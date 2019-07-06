@@ -1,0 +1,4 @@
+plugins:
+  discourse_chart_enabled:
+    default: true
+    client: true

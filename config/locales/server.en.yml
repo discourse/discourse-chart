@@ -1,0 +1,4 @@
+en:
+  site_settings:
+    discourse_chart_enabled: "Enable the discourse-chart plugin"
+  discourse_chart_placeholder: "📈 Click here to view chart"

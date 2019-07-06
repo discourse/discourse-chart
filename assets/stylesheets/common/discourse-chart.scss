@@ -1,0 +1,21 @@
+div.discourse-chart {
+  &.is-loading {
+    padding: 2em;
+    background: $primary-very-low;
+  }
+
+  .discourse-chart-error {
+    padding: 2em;
+    background-color: $danger-low;
+    margin: 0;
+    color: $danger;
+    text-align: center;
+  }
+}
+
+a.discourse-chart-placeholder {
+  padding: 1em;
+  text-align: center;
+  display: block;
+  background: $primary-very-low;
+}

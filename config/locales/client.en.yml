@@ -1,0 +1,4 @@
+en:
+  js:
+    discourse_chart:
+      rendering_error: "Error while rendering chart."
