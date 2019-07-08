@@ -91,34 +91,38 @@ function buildChartOptions(container, chartAttributes) {
 export default {
   name: "discourse-chart",
 
-  renderChart(container) {
-    const chartMarkup = container.textContent;
-    const chartAttributes = extractChartAttributes(container);
+  renderCharts(charts) {
+    charts.forEach(chart => this.renderChart(chart));
+  },
+
+  renderChart(chart) {
+    const chartMarkup = chart.textContent;
+    const chartAttributes = extractChartAttributes(chart);
 
     const spinner = document.createElement("div");
     spinner.class = "spinner tiny";
-    container.appendChild(spinner);
+    chart.appendChild(spinner);
 
     loadScript("/javascripts/Chart.min.js").then(() => {
-      container.classList.remove("is-loading");
+      chart.classList.remove("is-loading");
 
       try {
         const canvas = document.createElement("canvas");
-        container.innerHTML = "";
-        container.appendChild(canvas);
+        chart.innerHTML = "";
+        chart.appendChild(canvas);
 
         new Chart(canvas, {
           type: chartAttributes.type || "line",
-          data: handleRawChart(chartMarkup, container, chartAttributes),
-          options: buildChartOptions(container, chartAttributes)
+          data: handleRawChart(chartMarkup, chart, chartAttributes),
+          options: buildChartOptions(chart, chartAttributes)
         });
       } catch (e) {
         console.log(e);
         const errorNode = document.createElement("div");
         errorNode.classList.add("discourse-chart-error");
         errorNode.textContent = I18n.t("discourse_chart.rendering_error");
-        container.innerHTML = "";
-        container.appendChild(errorNode);
+        chart.innerHTML = "";
+        chart.appendChild(errorNode);
       }
     });
   },
@@ -128,13 +132,12 @@ export default {
       api.decorateCooked(
         $elem => {
           const discourseCharts = $elem[0].querySelectorAll(".discourse-chart");
+
           if (
             discourseCharts.length &&
             Discourse.SiteSettings.discourse_chart_enabled
           ) {
-            discourseCharts.forEach(discourseChart =>
-              run.debounce(this, this.renderChart, discourseChart, 200)
-            );
+            run.debounce(this, this.renderCharts, discourseCharts, 250);
           }
         },
         { id: "discourse-chart" }
