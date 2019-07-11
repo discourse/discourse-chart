@@ -1,9 +1,25 @@
+import { number } from "discourse/lib/formatter";
 import loadScript from "discourse/lib/load-script";
 import { withPluginApi } from "discourse/lib/plugin-api";
 const { run } = Ember;
 
-function handleRawChart(markup, container, options) {
-  const rows = markup
+const DEFAULT_CHART_OPTIONS = {
+  responsive: true,
+  layout: {
+    padding: {
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0
+    }
+  },
+  animation: {
+    duration: 0
+  }
+};
+
+function cleanMarkup(markup) {
+  return markup
     .split("\n")
     .map(x =>
       x
@@ -12,28 +28,9 @@ function handleRawChart(markup, container, options) {
         .map(x => x.trim())
     )
     .filter(x => x);
-
-  const header = rows.shift();
-
-  return {
-    labels: rows.map(row => row[0]),
-    datasets: header.slice(1).map((label, index) => {
-      const dataset = { label, data: rows.map(row => row.slice(1)[index]) };
-
-      if (options.borderColors.length) {
-        dataset.borderColor = options.borderColors.shift();
-      }
-
-      if (options.backgroundColors.length) {
-        dataset.backgroundColor = options.backgroundColors.shift();
-      }
-
-      return dataset;
-    })
-  };
 }
 
-function extractChartAttributes(container) {
+function extractAttributes(container) {
   const attributes = {};
 
   attributes["borderColors"] = (
@@ -48,6 +45,10 @@ function extractChartAttributes(container) {
     .split(",")
     .filter(x => x);
 
+  attributes["labels"] = (container.getAttribute("data-labels") || "")
+    .split(",")
+    .filter(x => x);
+
   attributes["title"] = container.getAttribute("data-title");
   attributes["type"] = container.getAttribute("data-type");
   attributes["xAxisTitle"] = container.getAttribute("data-x-axis-title");
@@ -55,37 +56,107 @@ function extractChartAttributes(container) {
   return attributes;
 }
 
-function buildChartOptions(container, chartAttributes) {
-  const chartOptions = {
-    responsive: true,
-    hoverMode: "index",
-    stacked: false,
-    animation: {
-      duration: 0
+function buildChart(series, attributes) {
+  switch (attributes.type) {
+    case "doughnut":
+    case "pie":
+      return circularChart(series, attributes);
+    case "line":
+      return lineChart(series, attributes);
+    case "bar":
+      return barChart(series, attributes);
+  }
+}
+
+function lineChart(series, attributes) {
+  const labels = series.shift();
+
+  return {
+    type: attributes.type,
+    data: {
+      datasets: series.map((serie, index) => {
+        return {
+          data: serie.slice(1),
+          backgroundColor:
+            attributes.backgroundColors.length > 0
+              ? attributes.backgroundColors[index]
+              : attributes.borderColors[index],
+          borderColor: attributes.borderColors[index],
+          label: serie[0],
+          fill: attributes.backgroundColors.length > 0
+        };
+      }),
+      labels
     },
-    scales: {
-      xAxes: []
-    }
-  };
-
-  if (chartAttributes.title && chartAttributes.title.length) {
-    chartOptions.title = {
-      display: true,
-      text: chartAttributes.title
-    };
-  }
-
-  if (chartAttributes.xAxisTitle && chartAttributes.xAxisTitle.length) {
-    chartOptions.scales.xAxes.push({
-      display: true,
-      scaleLabel: {
-        display: chartAttributes.xAxisTitle.length,
-        labelString: chartAttributes.xAxisTitle
+    options: Object.assign(_.clone(DEFAULT_CHART_OPTIONS), {
+      scales: {
+        yAxes: [
+          {
+            display: true,
+            ticks: {
+              userCallback: label => {
+                if (Math.floor(label) === label) return number(label);
+              },
+              callback: label => number(label)
+            }
+          }
+        ]
       }
-    });
-  }
+    })
+  };
+}
 
-  return chartOptions;
+function barChart(series, attributes) {
+  const labels = series.shift();
+
+  return {
+    type: attributes.type,
+    data: {
+      datasets: series.map((serie, index) => {
+        return {
+          data: serie.slice(1),
+          backgroundColor: attributes.backgroundColors[index],
+          borderColor: attributes.borderColors[index] || "transparent",
+          label: serie[0]
+        };
+      }),
+      labels
+    },
+    options: Object.assign(_.clone(DEFAULT_CHART_OPTIONS), {
+      scales: {
+        yAxes: [
+          {
+            display: true,
+            ticks: {
+              userCallback: label => {
+                if (Math.floor(label) === label) return number(label);
+              },
+              callback: label => number(label)
+            }
+          }
+        ]
+      }
+    })
+  };
+}
+
+function circularChart(series, attributes) {
+  const labels = series.shift();
+
+  return {
+    type: attributes.type,
+    data: {
+      datasets: [
+        {
+          label: "serie 1",
+          data: series.shift(),
+          backgroundColor: attributes.backgroundColors
+        }
+      ],
+      labels
+    },
+    options: DEFAULT_CHART_OPTIONS
+  };
 }
 
 export default {
@@ -95,34 +166,30 @@ export default {
     charts.forEach(chart => this.renderChart(chart));
   },
 
-  renderChart(chart) {
-    const chartMarkup = chart.textContent;
-    const chartAttributes = extractChartAttributes(chart);
-
+  renderChart(container) {
     const spinner = document.createElement("div");
     spinner.class = "spinner tiny";
-    chart.appendChild(spinner);
+    container.appendChild(spinner);
 
     loadScript("/javascripts/Chart.min.js").then(() => {
-      chart.classList.remove("is-loading");
+      container.classList.remove("is-loading");
 
       try {
-        const canvas = document.createElement("canvas");
-        chart.innerHTML = "";
-        chart.appendChild(canvas);
+        const attributes = extractAttributes(container);
+        const data = cleanMarkup(container.textContent);
 
-        new Chart(canvas, {
-          type: chartAttributes.type || "line",
-          data: handleRawChart(chartMarkup, chart, chartAttributes),
-          options: buildChartOptions(chart, chartAttributes)
-        });
+        const canvas = document.createElement("canvas");
+        container.innerHTML = "";
+        container.appendChild(canvas);
+
+        new Chart(canvas, buildChart(data, attributes));
       } catch (e) {
         console.log(e);
         const errorNode = document.createElement("div");
         errorNode.classList.add("discourse-chart-error");
         errorNode.textContent = I18n.t("discourse_chart.rendering_error");
-        chart.innerHTML = "";
-        chart.appendChild(errorNode);
+        container.innerHTML = "";
+        container.appendChild(errorNode);
       }
     });
   },

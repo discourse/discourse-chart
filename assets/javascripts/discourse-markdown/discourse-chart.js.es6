@@ -1,4 +1,4 @@
-const SUPPORTED_CHART_TYPES = ["line", "bar"];
+const SUPPORTED_CHART_TYPES = ["line", "bar", "pie", "doughnut"];
 
 function processAttributes(attrs, escapeHtml) {
   const attributes = {};
@@ -31,6 +31,10 @@ function processAttributes(attrs, escapeHtml) {
     attributes["title"] = escapeHtml(attrs["title"]);
   }
 
+  if (attrs["labels"]) {
+    attributes["labels"] = escapeHtml(attrs["labels"]);
+  }
+
   return attributes;
 }
 
@@ -51,6 +55,7 @@ export function setup(helper) {
 
       replace(state, tagInfo, content) {
         const token = state.push("html_raw", "", 0);
+
         content = content
           .split("\n")
           .filter(x => x)
@@ -71,8 +76,6 @@ export function setup(helper) {
         token.content = `<div class="discourse-chart is-loading" ${formattedAttributes.join(
           " "
         )}>${content}</div>\n`;
-
-        console.log("WHAT?")
 
         return true;
       }
