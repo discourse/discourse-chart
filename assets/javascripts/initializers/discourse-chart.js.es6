@@ -182,7 +182,26 @@ export default {
         container.innerHTML = "";
         container.appendChild(canvas);
 
-        new Chart(canvas, buildChart(data, attributes));
+        const chart = buildChart(data, attributes);
+
+        if (attributes.title && attributes.title.length) {
+          chart.options.title = {
+            display: true,
+            text: attributes.title
+          };
+        }
+
+        if (attributes.xAxisTitle && attributes.xAxisTitle.length) {
+          chart.options.scales.xAxes.push({
+            display: true,
+            scaleLabel: {
+              display: attributes.xAxisTitle.length,
+              labelString: attributes.xAxisTitle
+            }
+          });
+        }
+
+        new Chart(canvas, chart);
       } catch (e) {
         console.log(e);
         const errorNode = document.createElement("div");
