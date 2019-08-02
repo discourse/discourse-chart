@@ -4,6 +4,7 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 const { run } = Ember;
 
 const DEFAULT_CHART_OPTIONS = {
+  maintainAspectRatio: true,
   responsive: true,
   layout: {
     padding: {
@@ -167,21 +168,18 @@ export default {
   },
 
   renderChart(container) {
+    const attributes = extractAttributes(container);
+    const data = cleanMarkup(container.textContent);
+    container.innerHTML = "";
+
     const spinner = document.createElement("div");
-    spinner.class = "spinner tiny";
+    spinner.classList.add("spinner");
+    spinner.classList.add("tiny");
     container.appendChild(spinner);
+    container.classList.remove("is-building");
 
     loadScript("/javascripts/Chart.min.js").then(() => {
-      container.classList.remove("is-loading");
-
       try {
-        const attributes = extractAttributes(container);
-        const data = cleanMarkup(container.textContent);
-
-        const canvas = document.createElement("canvas");
-        container.innerHTML = "";
-        container.appendChild(canvas);
-
         const chart = buildChart(data, attributes);
 
         if (attributes.title && attributes.title.length) {
@@ -201,7 +199,11 @@ export default {
           });
         }
 
+        const canvas = document.createElement("canvas");
         new Chart(canvas, chart);
+        container.innerHTML = "";
+        container.appendChild(canvas);
+        container.classList.remove("is-loading");
       } catch (e) {
         console.log(e);
         const errorNode = document.createElement("div");

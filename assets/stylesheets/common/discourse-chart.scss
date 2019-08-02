@@ -1,6 +1,14 @@
 div.discourse-chart {
+  display: flex;
+  align-items: center;
+  height: 400px;
+  overflow: hidden;
+
+  &.is-building {
+    visibility: hidden;
+  }
+
   &.is-loading {
-    padding: 2em;
     background: $primary-very-low;
   }
 

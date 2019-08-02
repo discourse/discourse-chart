@@ -47,7 +47,11 @@ export function setup(helper) {
     opts.features.discourse_chart = siteSettings.discourse_chart_enabled;
   });
 
-  helper.whiteList(["div.discourse-chart", "div.discourse-chart.is-loading"]);
+  helper.whiteList([
+    "div.discourse-chart",
+    "div.discourse-chart.is-loading",
+    "div.discourse-chart.is-building",
+  ]);
 
   helper.registerPlugin(md => {
     md.inline.bbcode.ruler.push("discourse-chart", {
@@ -73,7 +77,7 @@ export function setup(helper) {
           formattedAttributes.push(`data-${attribute}="${value}"`);
         });
 
-        token.content = `<div class="discourse-chart is-loading" ${formattedAttributes.join(
+        token.content = `<div class="discourse-chart is-building is-loading" ${formattedAttributes.join(
           " "
         )}>${content}</div>\n`;
 
