@@ -14,6 +14,9 @@ const DEFAULT_CHART_OPTIONS = {
       bottom: 0
     }
   },
+  legend: {
+    position: "bottom"
+  },
   animation: {
     duration: 0
   }
