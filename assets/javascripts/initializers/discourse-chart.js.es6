@@ -4,7 +4,6 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 const { run } = Ember;
 
 const DEFAULT_CHART_OPTIONS = {
-  maintainAspectRatio: true,
   responsive: true,
   layout: {
     padding: {
@@ -184,6 +183,9 @@ export default {
     loadScript("/javascripts/Chart.min.js").then(() => {
       try {
         const chart = buildChart(data, attributes);
+
+        const isMobileView = Discourse.Site.currentProp("mobileView");
+        chart.options.maintainAspectRatio = !isMobileView;
 
         if (attributes.title && attributes.title.length) {
           chart.options.title = {
