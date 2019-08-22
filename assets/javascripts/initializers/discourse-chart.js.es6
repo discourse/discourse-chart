@@ -166,7 +166,7 @@ export default {
   name: "discourse-chart",
 
   renderCharts(charts) {
-    charts.forEach(chart => this.renderChart(chart));
+    $(charts).each((index, chart) => this.renderChart(chart));
   },
 
   renderChart(container) {
