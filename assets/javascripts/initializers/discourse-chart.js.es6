@@ -1,7 +1,6 @@
 import { number } from "discourse/lib/formatter";
 import loadScript from "discourse/lib/load-script";
 import { withPluginApi } from "discourse/lib/plugin-api";
-const { run } = Ember;
 
 const DEFAULT_CHART_OPTIONS = {
   responsive: true,
@@ -230,7 +229,7 @@ export default {
             discourseCharts.length &&
             Discourse.SiteSettings.discourse_chart_enabled
           ) {
-            run.debounce(this, this.renderCharts, discourseCharts, 250);
+            this.renderCharts(discourseCharts);
           }
         },
         { id: "discourse-chart" }
