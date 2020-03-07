@@ -1,4 +1,10 @@
-const SUPPORTED_CHART_TYPES = ["line", "bar", "pie", "doughnut"];
+const SUPPORTED_CHART_TYPES = [
+  "line",
+  "bar",
+  "pie",
+  "doughnut",
+  "horizontalBar"
+];
 
 function processAttributes(attrs, escapeHtml) {
   const attributes = {};
@@ -50,7 +56,7 @@ export function setup(helper) {
   helper.whiteList([
     "div.discourse-chart",
     "div.discourse-chart.is-loading",
-    "div.discourse-chart.is-building",
+    "div.discourse-chart.is-building"
   ]);
 
   helper.registerPlugin(md => {

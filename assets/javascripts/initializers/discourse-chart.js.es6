@@ -26,10 +26,10 @@ function cleanMarkup(markup) {
     .map(x =>
       x
         .split("|")
-        .filter(x => x)
-        .map(x => x.trim())
+        .filter(i => i)
+        .map(i => i.trim())
     )
-    .filter(x => x);
+    .filter(i => i);
 }
 
 function extractAttributes(container) {
@@ -67,6 +67,8 @@ function buildChart(series, attributes) {
       return lineChart(series, attributes);
     case "bar":
       return barChart(series, attributes);
+    case "horizontalBar":
+      return horizontalBarChart(series, attributes);
   }
 }
 
@@ -108,8 +110,40 @@ function lineChart(series, attributes) {
   };
 }
 
+function horizontalBarChart(series, attributes) {
+  const labels = series.map(a => a[0]);
+  const datasets = [...Array(series[0].length - 1).keys()].map(idx => {
+    return {
+      data: series.map(a => a[idx + 1]),
+      backgroundColor: attributes.backgroundColors[idx],
+      borderColor: attributes.borderColors[idx] || "transparent"
+    };
+  });
+
+  return {
+    options: Object.assign(_.clone(DEFAULT_CHART_OPTIONS), {
+      legend: {
+        display: false
+      },
+      scales: {
+        xAxes: [
+          {
+            ticks: { min: 0 }
+          }
+        ]
+      }
+    }),
+    type: attributes.type,
+    data: {
+      labels,
+      datasets
+    }
+  };
+}
+
 function barChart(series, attributes) {
   const labels = series.shift();
+  const horiz = attributes.type === "horizontalBar";
 
   return {
     type: attributes.type,
@@ -125,6 +159,9 @@ function barChart(series, attributes) {
       labels
     },
     options: Object.assign(_.clone(DEFAULT_CHART_OPTIONS), {
+      legend: {
+        position: horiz ? "right" : "bottom"
+      },
       scales: {
         yAxes: [
           {
@@ -194,13 +231,14 @@ export default {
         }
 
         if (attributes.xAxisTitle && attributes.xAxisTitle.length) {
-          chart.options.scales.xAxes.push({
-            display: true,
-            scaleLabel: {
-              display: attributes.xAxisTitle.length,
-              labelString: attributes.xAxisTitle
-            }
-          });
+          chart.options.scales = chart.options.scales || {};
+          chart.options.scales.xAxes = chart.options.scales.xAxes || [{}];
+          const xAxes = chart.options.scales.xAxes[0];
+          xAxes.display = true;
+          xAxes.scaleLabel = {
+            display: attributes.xAxisTitle.length,
+            labelString: attributes.xAxisTitle
+          };
         }
 
         const canvas = document.createElement("canvas");
