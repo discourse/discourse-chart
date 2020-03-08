@@ -263,11 +263,13 @@ export default {
       }
 
       const canvas = document.createElement("canvas");
-      new Chart(canvas, chart);
+      // eslint-disable-next-line
+      new window.Chart(canvas, chart);
       container.innerHTML = "";
       container.appendChild(canvas);
       container.classList.remove("is-loading");
     } catch (e) {
+      // eslint-disable-next-line
       console.log(e);
       const errorNode = document.createElement("div");
       errorNode.classList.add("discourse-chart-error");
