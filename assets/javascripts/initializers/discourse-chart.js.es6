@@ -26,10 +26,10 @@ function cleanMarkup(markup) {
     .map(x =>
       x
         .split("|")
-        .filter(i => i)
+        .filter(Boolean)
         .map(i => i.trim())
     )
-    .filter(i => i);
+    .filter(Boolean);
 }
 
 function extractAttributes(container) {
@@ -39,17 +39,17 @@ function extractAttributes(container) {
     container.getAttribute("data-border-colors") || ""
   )
     .split(",")
-    .filter(x => x);
+    .filter(Boolean);
 
   attributes["backgroundColors"] = (
     container.getAttribute("data-background-colors") || ""
   )
     .split(",")
-    .filter(x => x);
+    .filter(Boolean);
 
   attributes["labels"] = (container.getAttribute("data-labels") || "")
     .split(",")
-    .filter(x => x);
+    .filter(Boolean);
 
   attributes["title"] = container.getAttribute("data-title");
   attributes["type"] = container.getAttribute("data-type");

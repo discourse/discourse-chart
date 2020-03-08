@@ -68,7 +68,7 @@ export function setup(helper) {
 
         content = content
           .split("\n")
-          .filter(x => x)
+          .filter(Boolean)
           .map(x => state.md.utils.escapeHtml(x))
           .join("\n");
 
