@@ -221,7 +221,7 @@ export default {
 
   renderCharts(charts) {
     loadScript("/javascripts/Chart.min.js").then(() =>
-      charts.forEach(chart => this.renderChart(chart))
+      charts.forEach(this.renderChart)
     );
   },
 
