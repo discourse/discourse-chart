@@ -220,7 +220,9 @@ export default {
   name: "discourse-chart",
 
   renderCharts(charts) {
-    $(charts).each((index, chart) => this.renderChart(chart));
+    loadScript("/javascripts/Chart.min.js").then(() => {
+      $(charts).each((index, chart) => this.renderChart(chart));
+    });
   },
 
   renderChart(container) {
@@ -234,45 +236,43 @@ export default {
     container.appendChild(spinner);
     container.classList.remove("is-building");
 
-    loadScript("/javascripts/Chart.min.js").then(() => {
-      try {
-        const chart = buildChart(data, attributes);
+    try {
+      const chart = buildChart(data, attributes);
 
-        const isMobileView = Discourse.Site.currentProp("mobileView");
-        chart.options.maintainAspectRatio = !isMobileView;
+      const isMobileView = Discourse.Site.currentProp("mobileView");
+      chart.options.maintainAspectRatio = !isMobileView;
 
-        if (attributes.title && attributes.title.length) {
-          chart.options.title = {
-            display: true,
-            text: attributes.title
-          };
-        }
-
-        if (attributes.xAxisTitle && attributes.xAxisTitle.length) {
-          chart.options.scales = chart.options.scales || {};
-          chart.options.scales.xAxes = chart.options.scales.xAxes || [{}];
-          const xAxes = chart.options.scales.xAxes[0];
-          xAxes.display = true;
-          xAxes.scaleLabel = {
-            display: attributes.xAxisTitle.length,
-            labelString: attributes.xAxisTitle
-          };
-        }
-
-        const canvas = document.createElement("canvas");
-        new Chart(canvas, chart);
-        container.innerHTML = "";
-        container.appendChild(canvas);
-        container.classList.remove("is-loading");
-      } catch (e) {
-        console.log(e);
-        const errorNode = document.createElement("div");
-        errorNode.classList.add("discourse-chart-error");
-        errorNode.textContent = I18n.t("discourse_chart.rendering_error");
-        container.innerHTML = "";
-        container.appendChild(errorNode);
+      if (attributes.title && attributes.title.length) {
+        chart.options.title = {
+          display: true,
+          text: attributes.title
+        };
       }
-    });
+
+      if (attributes.xAxisTitle && attributes.xAxisTitle.length) {
+        chart.options.scales = chart.options.scales || {};
+        chart.options.scales.xAxes = chart.options.scales.xAxes || [{}];
+        const xAxes = chart.options.scales.xAxes[0];
+        xAxes.display = true;
+        xAxes.scaleLabel = {
+          display: attributes.xAxisTitle.length,
+          labelString: attributes.xAxisTitle
+        };
+      }
+
+      const canvas = document.createElement("canvas");
+      new Chart(canvas, chart);
+      container.innerHTML = "";
+      container.appendChild(canvas);
+      container.classList.remove("is-loading");
+    } catch (e) {
+      console.log(e);
+      const errorNode = document.createElement("div");
+      errorNode.classList.add("discourse-chart-error");
+      errorNode.textContent = I18n.t("discourse_chart.rendering_error");
+      container.innerHTML = "";
+      container.appendChild(errorNode);
+    }
   },
 
   initialize() {
