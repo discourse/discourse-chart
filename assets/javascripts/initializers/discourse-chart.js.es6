@@ -220,6 +220,8 @@ export default {
   name: "discourse-chart",
 
   renderCharts(charts) {
+    if (!charts.length) return;
+
     loadScript("/javascripts/Chart.min.js").then(() =>
       charts.forEach(this.renderChart)
     );
@@ -279,12 +281,10 @@ export default {
     withPluginApi("0.8.31", api => {
       api.decorateCooked(
         $elem => {
-          const discourseCharts = $elem[0].querySelectorAll(".discourse-chart");
-
-          if (
-            discourseCharts.length &&
-            Discourse.SiteSettings.discourse_chart_enabled
-          ) {
+          if (Discourse.SiteSettings.discourse_chart_enabled) {
+            const discourseCharts = $elem[0].querySelectorAll(
+              ".discourse-chart"
+            );
             this.renderCharts(discourseCharts);
           }
         },
