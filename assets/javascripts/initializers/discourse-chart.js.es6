@@ -220,9 +220,9 @@ export default {
   name: "discourse-chart",
 
   renderCharts(charts) {
-    loadScript("/javascripts/Chart.min.js").then(() => {
-      $(charts).each((index, chart) => this.renderChart(chart));
-    });
+    loadScript("/javascripts/Chart.min.js").then(() =>
+      charts.forEach(chart => this.renderChart(chart))
+    );
   },
 
   renderChart(container) {
