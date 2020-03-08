@@ -130,6 +130,24 @@ function horizontalBarChart(series, attributes) {
           {
             ticks: { min: 0 }
           }
+        ],
+        yAxes: [
+          {
+            ticks: {
+              callback: function(value) {
+                const isMobileView = Discourse.Site.currentProp("mobileView");
+                if (
+                  isMobileView &&
+                  typeof value === "string" &&
+                  value.length > 20
+                ) {
+                  return value.substr(0, 17) + "…";
+                } else {
+                  return value;
+                }
+              }
+            }
+          }
         ]
       }
     }),
