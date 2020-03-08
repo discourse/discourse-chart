@@ -1,0 +1,63 @@
+{{#d-modal-body title="chart.ui_builder.title" class="chart-ui-builder"}}
+   <form>
+      <section class="options-form">
+      {{input
+        placeholder=(i18n "chart.ui_builder.config.title_placeholder")
+        value=config.title
+        input=(action (mut config.title) value="target.value")
+      }}
+      {{input
+        placeholder=(i18n "chart.ui_builder.config.x_axis_title_placeholder")
+        value=config.xAxisTitle
+        input=(action (mut config.xAxisTitle) value="target.value")
+      }}
+    </section>
+
+    <section class="rows-form">
+      <div class="section-title">
+        <h3>{{i18n "chart.ui_builder.chart_data"}}</h3>
+        <div class="section-actions">
+          {{#unless config.rows}}
+            {{d-button type="button" icon="plus" action=(action "addRow")}}
+          {{/unless}}
+        </div>
+      </div>
+      <div class="section-body">
+        {{#each config.rows as |row|}}
+          <div class="config-row">
+            {{input
+              placeholder=(i18n "chart.ui_builder.config.label_placeholder")
+              class="row-label"
+              value=row.label
+              input=(action (mut row.label) value="target.value")
+            }}
+            {{input
+              placeholder=(i18n "chart.ui_builder.config.value_placeholder")
+              class="row-value"
+              value=row.value
+              input=(action (mut row.value) value="target.value")
+            }}
+            {{d-button type="button" icon="plus" action=(action "addRow")}}
+            {{d-button
+              type="button"
+              icon="trash-alt"
+              action=(action "removeRow")
+              actionParam=row
+            }}
+          </div>
+         {{/each}}
+      </div>
+    </section>
+  </form>
+{{/d-modal-body}}
+
+<div class="modal-footer">
+  {{d-button
+    type="button"
+    disabled=cannotInsertChart
+    class="btn-primary"
+    label="chart.ui_builder.insert_chart"
+    icon="chart-line"
+    action=(action "insertChart")
+  }}
+</div>

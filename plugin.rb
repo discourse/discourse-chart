@@ -10,6 +10,8 @@ enabled_site_setting :discourse_chart_enabled
 
 register_asset 'stylesheets/common/discourse-chart.scss'
 
+register_svg_icon "fas fa-chart-line"
+
 after_initialize do
   DiscourseEvent.on(:reduce_cooked) do |doc, post|
     if SiteSetting.discourse_chart_enabled

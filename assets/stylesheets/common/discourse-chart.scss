@@ -28,3 +28,49 @@ a.discourse-chart-placeholder {
   display: block;
   background: $primary-very-low;
 }
+
+.chart-ui-builder {
+  .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1em;
+  }
+
+  .rows-form {
+    .config-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5em;
+    }
+
+    .row-label,
+    .row-value {
+      margin: 0;
+    }
+
+    .row-label {
+      flex: 1;
+    }
+
+    .row-value {
+      width: 75px;
+      border-left: 0;
+    }
+
+    .btn {
+      margin-left: 0.5em;
+    }
+  }
+
+  .options-form {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1em;
+
+    .ember-text-field {
+      width: 100%;
+    }
+  }
+}

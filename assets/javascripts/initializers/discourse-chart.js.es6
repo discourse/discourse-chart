@@ -273,7 +273,7 @@ export default {
       console.log(e);
       const errorNode = document.createElement("div");
       errorNode.classList.add("discourse-chart-error");
-      errorNode.textContent = I18n.t("discourse_chart.rendering_error");
+      errorNode.textContent = I18n.t("chart.rendering_error");
       container.innerHTML = "";
       container.appendChild(errorNode);
     }

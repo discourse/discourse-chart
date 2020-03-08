@@ -1,4 +1,13 @@
 en:
   js:
-    discourse_chart:
+    chart:
       rendering_error: "Error while rendering chart."
+      ui_builder:
+        title: "Build Chart"
+        insert_chart: "Insert Chart"
+        chart_data: "Chart data"
+        config:
+          title_placeholder: "Chart title"
+          x_axis_title_placeholder: "X Axis title"
+          label_placeholder: "Label"
+          value_placeholder: "Value"
