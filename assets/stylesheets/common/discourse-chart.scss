@@ -1,6 +1,7 @@
 div.discourse-chart {
   display: flex;
   align-items: center;
+  height: 400px;
   overflow: hidden;
 
   &.is-building {
