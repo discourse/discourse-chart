@@ -136,12 +136,10 @@ function horizontalBarChart(series, attributes) {
             ticks: {
               callback: function(value) {
                 const isMobileView = Discourse.Site.currentProp("mobileView");
-                if (
-                  isMobileView &&
-                  typeof value === "string" &&
-                  value.length > 20
-                ) {
-                  return value.substr(0, 17) + "…";
+                const maxLength = isMobileView ? 20 : 40;
+
+                if (typeof value === "string" && value.length > maxLength) {
+                  return value.substr(0, maxLength) + "…";
                 } else {
                   return value;
                 }
