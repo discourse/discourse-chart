@@ -74,6 +74,7 @@ function buildChart(series, attributes) {
 
 function lineChart(series, attributes) {
   const labels = series.shift();
+  const optionsCopy = Object.assign({}, DEFAULT_CHART_OPTIONS);
 
   return {
     type: attributes.type,
@@ -92,7 +93,7 @@ function lineChart(series, attributes) {
       }),
       labels
     },
-    options: Object.assign(_.clone(DEFAULT_CHART_OPTIONS), {
+    options: Object.assign(optionsCopy, {
       scales: {
         yAxes: [
           {
@@ -119,9 +120,10 @@ function horizontalBarChart(series, attributes) {
       borderColor: attributes.borderColors[idx] || "transparent"
     };
   });
+  const optionsCopy = Object.assign({}, DEFAULT_CHART_OPTIONS);
 
   return {
-    options: Object.assign(_.clone(DEFAULT_CHART_OPTIONS), {
+    options: Object.assign(optionsCopy, {
       legend: {
         display: false
       },
@@ -160,6 +162,7 @@ function horizontalBarChart(series, attributes) {
 function barChart(series, attributes) {
   const labels = series.shift();
   const horiz = attributes.type === "horizontalBar";
+  const optionsCopy = Object.assign({}, DEFAULT_CHART_OPTIONS);
 
   return {
     type: attributes.type,
@@ -174,7 +177,7 @@ function barChart(series, attributes) {
       }),
       labels
     },
-    options: Object.assign(_.clone(DEFAULT_CHART_OPTIONS), {
+    options: Object.assign(optionsCopy, {
       legend: {
         position: horiz ? "right" : "bottom"
       },
