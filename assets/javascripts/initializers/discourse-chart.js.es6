@@ -305,12 +305,10 @@ export default {
 
   initialize() {
     withPluginApi("0.8.31", api => {
-      api.decorateCooked(
-        $elem => {
+      api.decorateCookedElement(
+        cooked => {
           if (Discourse.SiteSettings.discourse_chart_enabled) {
-            const discourseCharts = $elem[0].querySelectorAll(
-              ".discourse-chart"
-            );
+            const discourseCharts = cooked.querySelectorAll(".discourse-chart");
             this.renderCharts(discourseCharts);
           }
         },
