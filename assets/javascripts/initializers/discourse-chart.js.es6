@@ -246,9 +246,16 @@ export default {
   renderCharts(charts) {
     if (!charts.length) return;
 
-    loadScript("/javascripts/Chart.min.js").then(() =>
-      charts.forEach(this.renderChart)
-    );
+    loadScript("/javascripts/Chart.min.js").then(() => {
+      // makes linear charts start at 0
+      window.Chart.scaleService.updateScaleDefaults("linear", {
+        ticks: {
+          min: 0
+        }
+      });
+
+      charts.forEach(this.renderChart);
+    });
   },
 
   renderChart(container) {
