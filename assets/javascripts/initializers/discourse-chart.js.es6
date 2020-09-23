@@ -20,6 +20,22 @@ const DEFAULT_CHART_OPTIONS = {
   }
 };
 
+// http://blog.adamcole.ca/2011/11/simple-javascript-rainbow-color.html
+function rainbowStop(h) {
+  let f = (n, k = (n + h * 12) % 12) =>
+    0.5 - 0.5 * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+  let rgb2hex = (r, g, b) =>
+    "#" +
+    [r, g, b]
+      .map(x =>
+        Math.round(x * 255)
+          .toString(16)
+          .padStart(2, 0)
+      )
+      .join("");
+  return rgb2hex(f(0), f(8), f(4));
+}
+
 function cleanMarkup(markup) {
   return markup
     .split("\n")
@@ -59,6 +75,13 @@ function extractAttributes(container) {
 }
 
 function buildChart(series, attributes) {
+  attributes.backgroundColors =
+    attributes.backgroundColors && attributes.backgroundColors.length
+      ? attributes.backgroundColors
+      : Array(series[0].length)
+          .fill()
+          .map(() => rainbowStop(Math.random()));
+
   switch (attributes.type) {
     case "doughnut":
     case "pie":
