@@ -74,13 +74,25 @@ function extractAttributes(container) {
   return attributes;
 }
 
+function computeColorsForLengthAtIndex(length) {
+  return Array(length)
+    .fill()
+    .map((_, index) => rainbowStop((1 * index) / length)); // cross product to ensure linear progress
+}
+
 function buildChart(series, attributes) {
-  attributes.backgroundColors =
-    attributes.backgroundColors && attributes.backgroundColors.length
-      ? attributes.backgroundColors
-      : Array(series[0].length)
-          .fill()
-          .map(() => rainbowStop(Math.random()));
+  if (!attributes.backgroundColors.length) {
+    // series of length 2 could be labels + one serie of data
+    if (series.length <= 2) {
+      attributes.backgroundColors = computeColorsForLengthAtIndex(
+        series[0].length
+      );
+    } else if (series.length > 2) {
+      attributes.backgroundColors = computeColorsForLengthAtIndex(
+        series.length
+      );
+    }
+  }
 
   switch (attributes.type) {
     case "doughnut":
