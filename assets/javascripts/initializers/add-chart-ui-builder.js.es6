@@ -4,6 +4,8 @@ import { readOnly } from "@ember/object/computed";
 
 function initializeChartUIBuilder(api) {
   api.modifyClass("controller:composer", {
+    pluginId: "discourse-chart",
+
     canBuildChart: readOnly("siteSettings.discourse_chart_enabled"),
 
     actions: {
