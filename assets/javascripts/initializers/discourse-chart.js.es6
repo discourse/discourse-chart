@@ -279,17 +279,15 @@ function circularChart(series, attributes) {
 export default {
   name: "discourse-chart",
 
-  renderCharts(discourseContainer, charts) {
+  renderCharts(charts) {
     if (!charts.length) return;
 
     loadScript("/javascripts/Chart.min.js").then(() => {
-      charts.forEach(chartContainer =>
-        this.renderChart(chartContainer, discourseContainer)
-      );
+      charts.forEach(chartContainer => this.renderChart(chartContainer));
     });
   },
 
-  renderChart(container, discourseContainer) {
+  renderChart(container) {
     const attributes = extractAttributes(container);
     const data = cleanMarkup(container.textContent);
     container.innerHTML = "";
@@ -302,8 +300,7 @@ export default {
 
     try {
       const chart = buildChart(data, attributes);
-      const site = discourseContainer.lookup("site:main");
-      const isMobileView = site.mobileView;
+      const isMobileView = Site.currentProp("mobileView");
       chart.options.maintainAspectRatio = isMobileView;
 
       if (attributes.title && attributes.title.length) {
@@ -337,7 +334,7 @@ export default {
           const siteSettings = api.container.lookup("site-settings:main");
           if (siteSettings.discourse_chart_enabled) {
             const discourseCharts = cooked.querySelectorAll(".discourse-chart");
-            this.renderCharts(api.container, discourseCharts);
+            this.renderCharts(discourseCharts);
           }
         },
         { id: "discourse-chart" }
