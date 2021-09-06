@@ -283,8 +283,6 @@ export default {
     if (!charts.length) return;
 
     loadScript("/javascripts/Chart.min.js").then(() => {
-      // makes linear charts start at 0
-      // window.Chart.defaults.scales["linear"] = { tick: { min: 0 } };
       charts.forEach(chartContainer =>
         this.renderChart(chartContainer, discourseContainer)
       );
