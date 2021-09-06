@@ -1,3 +1,4 @@
+import Site from "discourse/models/site";
 import { number } from "discourse/lib/formatter";
 import loadScript from "discourse/lib/load-script";
 import { withPluginApi } from "discourse/lib/plugin-api";
@@ -12,11 +13,13 @@ const DEFAULT_CHART_OPTIONS = {
       bottom: 0
     }
   },
-  legend: {
-    position: "bottom"
-  },
   animation: {
     duration: 0
+  },
+  plugins: {
+    legend: {
+      position: "bottom"
+    }
   }
 };
 
@@ -130,63 +133,79 @@ function lineChart(series, attributes) {
     },
     options: Object.assign(optionsCopy, {
       scales: {
-        yAxes: [
-          {
+        x: {
+          title: {
             display: true,
-            ticks: {
-              userCallback: label => {
-                if (Math.floor(label) === label) return number(label);
-              },
-              callback: label => number(label)
-            }
+            text: attributes.xAxisTitle
           }
-        ]
+        },
+        y: {
+          display: true,
+          ticks: {
+            userCallback: label => {
+              if (Math.floor(label) === label) return number(label);
+            },
+            callback: label => number(label)
+          }
+        }
       }
     })
   };
 }
 
 function horizontalBarChart(series, attributes) {
+  let datasets;
+  if (series[0].length < 1) {
+    datasets = [];
+  }
+
   const labels = series.map(a => a[0]);
-  const datasets = [...Array(series[0].length - 1).keys()].map(idx => {
-    return {
-      data: series.map(a => a[idx + 1]),
-      backgroundColor: attributes.backgroundColors[idx],
-      borderColor: attributes.borderColors[idx] || "transparent"
-    };
-  });
+  datasets =
+    datasets ||
+    [...Array(series[0].length - 1).keys()].map(idx => {
+      return {
+        data: series.map(a => a[idx + 1]),
+        backgroundColor: attributes.backgroundColors[idx],
+        borderColor: attributes.borderColors[idx] || "transparent"
+      };
+    });
   const optionsCopy = Object.assign({}, DEFAULT_CHART_OPTIONS);
 
   return {
     options: Object.assign(optionsCopy, {
-      legend: {
-        display: false
+      plugins: {
+        legend: {
+          display: false
+        }
       },
+      indexAxis: "y",
       scales: {
-        xAxes: [
-          {
-            ticks: { min: 0 }
-          }
-        ],
-        yAxes: [
-          {
-            ticks: {
-              callback: function(value) {
-                const isMobileView = Discourse.Site.currentProp("mobileView");
-                const maxLength = isMobileView ? 20 : 40;
-
-                if (typeof value === "string" && value.length > maxLength) {
-                  return value.substr(0, maxLength) + "…";
-                } else {
-                  return value;
-                }
+        x: {
+          title: {
+            display: true,
+            text: attributes.xAxisTitle
+          },
+          min: 0
+        },
+        y: {
+          ticks: {
+            callback: function(value) {
+              const label = this.getLabelForValue(value);
+              const isMobileView = Site.currentProp("mobileView");
+              const maxLength = isMobileView ? 20 : 40;
+              if (label) {
+                return label.length > maxLength
+                  ? label.substr(0, maxLength) + "…"
+                  : label;
+              } else {
+                return value;
               }
             }
           }
-        ]
+        }
       }
     }),
-    type: attributes.type,
+    type: "bar",
     data: {
       labels,
       datasets
@@ -196,11 +215,10 @@ function horizontalBarChart(series, attributes) {
 
 function barChart(series, attributes) {
   const labels = series.shift();
-  const horiz = attributes.type === "horizontalBar";
   const optionsCopy = Object.assign({}, DEFAULT_CHART_OPTIONS);
 
   return {
-    type: attributes.type,
+    type: "bar",
     data: {
       datasets: series.map((serie, index) => {
         return {
@@ -213,21 +231,27 @@ function barChart(series, attributes) {
       labels
     },
     options: Object.assign(optionsCopy, {
-      legend: {
-        position: horiz ? "right" : "bottom"
+      plugins: {
+        legend: {
+          position: "right"
+        }
       },
       scales: {
-        yAxes: [
-          {
+        x: {
+          title: {
             display: true,
-            ticks: {
-              userCallback: label => {
-                if (Math.floor(label) === label) return number(label);
-              },
-              callback: label => number(label)
-            }
+            text: attributes.xAxisTitle
           }
-        ]
+        },
+        y: {
+          display: true,
+          ticks: {
+            userCallback: label => {
+              if (Math.floor(label) === label) return number(label);
+            },
+            callback: label => number(label)
+          }
+        }
       }
     })
   };
@@ -255,22 +279,19 @@ function circularChart(series, attributes) {
 export default {
   name: "discourse-chart",
 
-  renderCharts(charts) {
+  renderCharts(discourseContainer, charts) {
     if (!charts.length) return;
 
     loadScript("/javascripts/Chart.min.js").then(() => {
       // makes linear charts start at 0
-      window.Chart.scaleService.updateScaleDefaults("linear", {
-        ticks: {
-          min: 0
-        }
-      });
-
-      charts.forEach(this.renderChart);
+      // window.Chart.defaults.scales["linear"] = { tick: { min: 0 } };
+      charts.forEach(chartContainer =>
+        this.renderChart(chartContainer, discourseContainer)
+      );
     });
   },
 
-  renderChart(container) {
+  renderChart(container, discourseContainer) {
     const attributes = extractAttributes(container);
     const data = cleanMarkup(container.textContent);
     container.innerHTML = "";
@@ -283,25 +304,14 @@ export default {
 
     try {
       const chart = buildChart(data, attributes);
-
-      const isMobileView = Discourse.Site.currentProp("mobileView");
-      chart.options.maintainAspectRatio = !isMobileView;
+      const site = discourseContainer.lookup("site:main");
+      const isMobileView = site.mobileView;
+      chart.options.maintainAspectRatio = isMobileView;
 
       if (attributes.title && attributes.title.length) {
-        chart.options.title = {
+        chart.options.plugins.title = {
           display: true,
           text: attributes.title
-        };
-      }
-
-      if (attributes.xAxisTitle && attributes.xAxisTitle.length) {
-        chart.options.scales = chart.options.scales || {};
-        chart.options.scales.xAxes = chart.options.scales.xAxes || [{}];
-        const xAxes = chart.options.scales.xAxes[0];
-        xAxes.display = true;
-        xAxes.scaleLabel = {
-          display: attributes.xAxisTitle.length,
-          labelString: attributes.xAxisTitle
         };
       }
 
@@ -326,9 +336,10 @@ export default {
     withPluginApi("0.8.31", api => {
       api.decorateCookedElement(
         cooked => {
-          if (Discourse.SiteSettings.discourse_chart_enabled) {
+          const siteSettings = api.container.lookup("site-settings:main");
+          if (siteSettings.discourse_chart_enabled) {
             const discourseCharts = cooked.querySelectorAll(".discourse-chart");
-            this.renderCharts(discourseCharts);
+            this.renderCharts(api.container, discourseCharts);
           }
         },
         { id: "discourse-chart" }
