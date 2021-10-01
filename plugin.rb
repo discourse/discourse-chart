@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # name: discourse-chart
-# about: Charts
+# about: Adds Charts in Discourse posts.
 # version: 0.0.1
 # authors: Joffrey Jaffeux
 # url: https://github.com/discourse/discourse-chart
