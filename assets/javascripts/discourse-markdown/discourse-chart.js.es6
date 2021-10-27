@@ -53,7 +53,7 @@ export function setup(helper) {
     opts.features.discourse_chart = siteSettings.discourse_chart_enabled;
   });
 
-  helper.whiteList([
+  helper.allowList([
     "div.discourse-chart",
     "div.discourse-chart.is-loading",
     "div.discourse-chart.is-building"
