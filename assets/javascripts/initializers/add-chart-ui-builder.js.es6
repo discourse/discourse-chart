@@ -11,8 +11,8 @@ function initializeChartUIBuilder(api) {
     actions: {
       showChartUIBuilder() {
         showModal("chart-ui-builder").set("toolbarEvent", this.toolbarEvent);
-      }
-    }
+      },
+    },
   });
 
   api.addToolbarPopupMenuOptionsCallback(() => {
@@ -20,7 +20,7 @@ function initializeChartUIBuilder(api) {
       action: "showChartUIBuilder",
       icon: "chart-line",
       label: "chart.ui_builder.title",
-      condition: "canBuildChart"
+      condition: "canBuildChart",
     };
   });
 }
@@ -30,5 +30,5 @@ export default {
 
   initialize() {
     withPluginApi("0.8.7", initializeChartUIBuilder);
-  }
+  },
 };

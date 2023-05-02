@@ -3,7 +3,7 @@ const SUPPORTED_CHART_TYPES = [
   "bar",
   "pie",
   "doughnut",
-  "horizontalBar"
+  "horizontalBar",
 ];
 
 function processAttributes(attrs, escapeHtml) {
@@ -56,10 +56,10 @@ export function setup(helper) {
   helper.allowList([
     "div.discourse-chart",
     "div.discourse-chart.is-loading",
-    "div.discourse-chart.is-building"
+    "div.discourse-chart.is-building",
   ]);
 
-  helper.registerPlugin(md => {
+  helper.registerPlugin((md) => {
     md.inline.bbcode.ruler.push("discourse-chart", {
       tag: "chart",
 
@@ -69,7 +69,7 @@ export function setup(helper) {
         content = content
           .split("\n")
           .filter(Boolean)
-          .map(x => state.md.utils.escapeHtml(x))
+          .map((x) => state.md.utils.escapeHtml(x))
           .join("\n");
 
         const attributes = processAttributes(
@@ -78,7 +78,7 @@ export function setup(helper) {
         );
 
         const formattedAttributes = [];
-        Object.keys(attributes).forEach(attribute => {
+        Object.keys(attributes).forEach((attribute) => {
           const value = attributes[attribute];
           formattedAttributes.push(`data-${attribute}="${value}"`);
         });
@@ -88,7 +88,7 @@ export function setup(helper) {
         )}>${content}</div>\n`;
 
         return true;
-      }
+      },
     });
   });
 }
