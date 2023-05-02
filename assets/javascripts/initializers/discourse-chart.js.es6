@@ -10,17 +10,17 @@ const DEFAULT_CHART_OPTIONS = {
       left: 0,
       top: 0,
       right: 0,
-      bottom: 0
-    }
+      bottom: 0,
+    },
   },
   animation: {
-    duration: 0
+    duration: 0,
   },
   plugins: {
     legend: {
-      position: "bottom"
-    }
-  }
+      position: "bottom",
+    },
+  },
 };
 
 // http://blog.adamcole.ca/2011/11/simple-javascript-rainbow-color.html
@@ -30,7 +30,7 @@ function rainbowStop(h) {
   let rgb2hex = (r, g, b) =>
     "#" +
     [r, g, b]
-      .map(x =>
+      .map((x) =>
         Math.round(x * 255)
           .toString(16)
           .padStart(2, 0)
@@ -42,11 +42,11 @@ function rainbowStop(h) {
 function cleanMarkup(markup) {
   return markup
     .split("\n")
-    .map(x =>
+    .map((x) =>
       x
         .split("|")
         .filter(Boolean)
-        .map(i => i.trim())
+        .map((i) => i.trim())
     )
     .filter(Boolean);
 }
@@ -126,30 +126,30 @@ function lineChart(series, attributes) {
               : attributes.borderColors[index],
           borderColor: attributes.borderColors[index],
           label: serie[0],
-          fill: attributes.backgroundColors.length > 0
+          fill: attributes.backgroundColors.length > 0,
         };
       }),
-      labels
+      labels,
     },
     options: Object.assign(optionsCopy, {
       scales: {
         x: {
           title: {
             display: true,
-            text: attributes.xAxisTitle
-          }
+            text: attributes.xAxisTitle,
+          },
         },
         y: {
           display: true,
           ticks: {
-            userCallback: label => {
+            userCallback: (label) => {
               if (Math.floor(label) === label) return number(label);
             },
-            callback: label => number(label)
-          }
-        }
-      }
-    })
+            callback: (label) => number(label),
+          },
+        },
+      },
+    }),
   };
 }
 
@@ -159,14 +159,14 @@ function horizontalBarChart(series, attributes) {
     datasets = [];
   }
 
-  const labels = series.map(a => a[0]);
+  const labels = series.map((a) => a[0]);
   datasets =
     datasets ||
-    [...Array(series[0].length - 1).keys()].map(idx => {
+    [...Array(series[0].length - 1).keys()].map((idx) => {
       return {
-        data: series.map(a => a[idx + 1]),
+        data: series.map((a) => a[idx + 1]),
         backgroundColor: attributes.backgroundColors[idx],
-        borderColor: attributes.borderColors[idx] || "transparent"
+        borderColor: attributes.borderColors[idx] || "transparent",
       };
     });
   const optionsCopy = Object.assign({}, DEFAULT_CHART_OPTIONS);
@@ -175,21 +175,21 @@ function horizontalBarChart(series, attributes) {
     options: Object.assign(optionsCopy, {
       plugins: {
         legend: {
-          display: false
-        }
+          display: false,
+        },
       },
       indexAxis: "y",
       scales: {
         x: {
           title: {
             display: true,
-            text: attributes.xAxisTitle
+            text: attributes.xAxisTitle,
           },
-          min: 0
+          min: 0,
         },
         y: {
           ticks: {
-            callback: function(value) {
+            callback: function (value) {
               const label = this.getLabelForValue(value);
               const isMobileView = Site.currentProp("mobileView");
               const maxLength = isMobileView ? 20 : 40;
@@ -200,16 +200,16 @@ function horizontalBarChart(series, attributes) {
               } else {
                 return value;
               }
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     }),
     type: "bar",
     data: {
       labels,
-      datasets
-    }
+      datasets,
+    },
   };
 }
 
@@ -225,35 +225,35 @@ function barChart(series, attributes) {
           data: serie.slice(1),
           backgroundColor: attributes.backgroundColors[index],
           borderColor: attributes.borderColors[index] || "transparent",
-          label: serie[0]
+          label: serie[0],
         };
       }),
-      labels
+      labels,
     },
     options: Object.assign(optionsCopy, {
       plugins: {
         legend: {
-          position: "right"
-        }
+          position: "right",
+        },
       },
       scales: {
         x: {
           title: {
             display: true,
-            text: attributes.xAxisTitle
-          }
+            text: attributes.xAxisTitle,
+          },
         },
         y: {
           display: true,
           ticks: {
-            userCallback: label => {
+            userCallback: (label) => {
               if (Math.floor(label) === label) return number(label);
             },
-            callback: label => number(label)
-          }
-        }
-      }
-    })
+            callback: (label) => number(label),
+          },
+        },
+      },
+    }),
   };
 }
 
@@ -267,12 +267,12 @@ function circularChart(series, attributes) {
         {
           label: "serie 1",
           data: series.shift(),
-          backgroundColor: attributes.backgroundColors
-        }
+          backgroundColor: attributes.backgroundColors,
+        },
       ],
-      labels
+      labels,
     },
-    options: DEFAULT_CHART_OPTIONS
+    options: DEFAULT_CHART_OPTIONS,
   };
 }
 
@@ -283,7 +283,7 @@ export default {
     if (!charts.length) return;
 
     loadScript("/javascripts/Chart.min.js").then(() => {
-      charts.forEach(chartContainer => this.renderChart(chartContainer));
+      charts.forEach((chartContainer) => this.renderChart(chartContainer));
     });
   },
 
@@ -306,7 +306,7 @@ export default {
       if (attributes.title && attributes.title.length) {
         chart.options.plugins.title = {
           display: true,
-          text: attributes.title
+          text: attributes.title,
         };
       }
 
@@ -328,9 +328,9 @@ export default {
   },
 
   initialize() {
-    withPluginApi("0.8.31", api => {
+    withPluginApi("0.8.31", (api) => {
       api.decorateCookedElement(
-        cooked => {
+        (cooked) => {
           const siteSettings = api.container.lookup("site-settings:main");
           if (siteSettings.discourse_chart_enabled) {
             const discourseCharts = cooked.querySelectorAll(".discourse-chart");
@@ -340,5 +340,5 @@ export default {
         { id: "discourse-chart" }
       );
     });
-  }
+  },
 };

@@ -10,10 +10,10 @@ export default Controller.extend({
     this._initializeConfig();
   },
 
-  cannotInsertChart: computed("config.rows.@each.{value,label}", function() {
+  cannotInsertChart: computed("config.rows.@each.{value,label}", function () {
     const validRows = [];
 
-    this.config.rows.forEach(row => {
+    this.config.rows.forEach((row) => {
       if (this._isValidRow(row)) {
         validRows.push(row);
       }
@@ -58,7 +58,7 @@ export default Controller.extend({
     }
 
     let markup = `[chart ${chartOptions.join(" ")}]\n`;
-    config.rows.forEach(row => {
+    config.rows.forEach((row) => {
       if (this._isValidRow(row)) {
         markup += `${row.label} | ${row.value}\n`;
       }
@@ -73,7 +73,7 @@ export default Controller.extend({
       EmberObject.create({
         title: null,
         xAxisTitle: null,
-        rows: [this._initializeRow()]
+        rows: [this._initializeRow()],
       })
     );
   },
@@ -81,7 +81,7 @@ export default Controller.extend({
   _initializeRow() {
     return EmberObject.create({
       label: null,
-      value: null
+      value: null,
     });
   },
 
@@ -94,5 +94,5 @@ export default Controller.extend({
       const labels = document.querySelectorAll(".chart-ui-builder .row-label");
       labels[labels.length - 1].focus();
     });
-  }
+  },
 });
