@@ -49,9 +49,7 @@ export default class ChartUiBuilder extends Component {
 
   @action
   insertChart() {
-    this.args.model.toolbarEvent.addText(
-      this.generateChartMarkup(this.config)
-    );
+    this.args.model.toolbarEvent.addText(this.generateChartMarkup(this.config));
     this.initializeConfig();
     this.args.closeModal();
   }
@@ -99,7 +97,11 @@ export default class ChartUiBuilder extends Component {
   }
 
   <template>
-    <DModal @title={{i18n "chart.ui_builder.title"}} class="chart-ui-builder">
+    <DModal
+      @title={{i18n "chart.ui_builder.title"}}
+      class="chart-ui-builder"
+      @closeModal={{@closeModal}}
+    >
       <:body>
         <form>
           <section class="options-form">
