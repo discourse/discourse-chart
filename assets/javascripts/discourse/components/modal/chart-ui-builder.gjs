@@ -35,7 +35,7 @@ export default class ChartUiBuilder extends Component {
 
   @action
   addRow() {
-    this.rows.pushObject(this._initializeRow());
+    this.rows.pushObject(this.initializeRow());
   }
 
   @action
@@ -43,7 +43,7 @@ export default class ChartUiBuilder extends Component {
     this.rows.removeObject(row);
 
     if (this.rows.length === 0) {
-      this.rows.pushObject(this._initializeRow());
+      this.rows.pushObject(this.initializeRow());
     }
   }
 
@@ -62,10 +62,12 @@ export default class ChartUiBuilder extends Component {
     if (config.xAxisTitle) {
       chartOptions.push(`xAxisTitle='${config.xAxisTitle}'`);
     }
-    let markup = `[chart ${chartOptions.join(" ")}]\n`;
+    let markup = `[chart ${chartOptions.join(" ")}]`;
+    markup += "\n";
     this.rows.forEach((row) => {
       if (this.isValidRow(row)) {
-        markup += `${row.label} | ${row.value}\n`;
+        markup += `${row.label} | ${row.value}`;
+        markup += "\n";
       }
     });
     markup += "[/chart]";
@@ -77,10 +79,10 @@ export default class ChartUiBuilder extends Component {
       title: null,
       xAxisTitle: null,
     });
-    this.rows = new TrackedArray([this._initializeRow()]);
+    this.rows = new TrackedArray([this.initializeRow()]);
   }
 
-  _initializeRow() {
+  initializeRow() {
     return EmberObject.create({
       label: null,
       value: null,
