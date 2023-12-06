@@ -1,7 +1,8 @@
-import Site from "discourse/models/site";
 import { number } from "discourse/lib/formatter";
 import loadScript from "discourse/lib/load-script";
 import { withPluginApi } from "discourse/lib/plugin-api";
+import Site from "discourse/models/site";
+import I18n from "discourse-i18n";
 
 const DEFAULT_CHART_OPTIONS = {
   responsive: true,
@@ -143,7 +144,9 @@ function lineChart(series, attributes) {
           display: true,
           ticks: {
             userCallback: (label) => {
-              if (Math.floor(label) === label) return number(label);
+              if (Math.floor(label) === label) {
+                return number(label);
+              }
             },
             callback: (label) => number(label),
           },
@@ -247,7 +250,9 @@ function barChart(series, attributes) {
           display: true,
           ticks: {
             userCallback: (label) => {
-              if (Math.floor(label) === label) return number(label);
+              if (Math.floor(label) === label) {
+                return number(label);
+              }
             },
             callback: (label) => number(label),
           },
@@ -280,7 +285,9 @@ export default {
   name: "discourse-chart",
 
   renderCharts(charts) {
-    if (!charts.length) return;
+    if (!charts.length) {
+      return;
+    }
 
     loadScript("/javascripts/Chart.min.js").then(() => {
       charts.forEach((chartContainer) => this.renderChart(chartContainer));

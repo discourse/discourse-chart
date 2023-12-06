@@ -1,5 +1,5 @@
-import ChartUiBuilder from "../discourse/components/modal/chart-ui-builder";
 import { withPluginApi } from "discourse/lib/plugin-api";
+import ChartUiBuilder from "../discourse/components/modal/chart-ui-builder";
 
 function initializeChartUIBuilder(api) {
   const siteSettings = api.container.lookup("service:site-settings");

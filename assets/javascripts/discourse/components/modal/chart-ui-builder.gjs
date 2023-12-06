@@ -68,7 +68,7 @@ export default class ChartUiBuilder extends Component {
         markup += `${row.label} | ${row.value}\n`;
       }
     });
-    markup += '[/chart]';
+    markup += "[/chart]";
     return markup;
   }
 
