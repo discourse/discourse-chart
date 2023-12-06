@@ -1,8 +1,9 @@
+import ChartUiBuilder from "../discourse/components/modal/chart-ui-builder";
 import { withPluginApi } from "discourse/lib/plugin-api";
-import showModal from "discourse/lib/show-modal";
 
 function initializeChartUIBuilder(api) {
   const siteSettings = api.container.lookup("service:site-settings");
+  const modal = api.container.lookup("service:modal");
 
   api.addComposerToolbarPopupMenuOption({
     label: "chart.ui_builder.title",
@@ -11,7 +12,7 @@ function initializeChartUIBuilder(api) {
       return siteSettings.discourse_chart_enabled;
     },
     action: (toolbarEvent) => {
-      showModal("chart-ui-builder").set("toolbarEvent", toolbarEvent);
+      modal.show(ChartUiBuilder, { model: { toolbarEvent } });
     },
   });
 }
