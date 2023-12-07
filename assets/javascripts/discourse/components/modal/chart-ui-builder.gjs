@@ -1,14 +1,13 @@
 import Component from "@glimmer/component";
-import { inject as service } from "@ember/service";
-import DModal from "discourse/components/d-modal";
-import i18n from "discourse-common/helpers/i18n";
-import { on } from "@ember/modifier";
-import { fn } from "@ember/helper";
-import EmberObject, { action } from "@ember/object";
-import DButton from "discourse/components/d-button";
 import { tracked } from "@glimmer/tracking";
 import { Input } from "@ember/component";
+import { fn } from "@ember/helper";
+import { on } from "@ember/modifier";
+import EmberObject, { action } from "@ember/object";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
+import DButton from "discourse/components/d-button";
+import DModal from "discourse/components/d-modal";
+import i18n from "discourse-common/helpers/i18n";
 import { debounce } from "discourse-common/utils/decorators";
 
 export default class ChartUiBuilder extends Component {
@@ -22,13 +21,9 @@ export default class ChartUiBuilder extends Component {
   }
 
   @action
-  isValidRow(row) {
-    this.disabled = !(row.label && row.value);
-  }
-
-  @action
   addRow() {
-    this.rows = this.rows.push(this.initializeRow());
+    this.rows.push(this.initializeRow());
+    this.rows = this.rows;
   }
 
   @action
@@ -41,17 +36,31 @@ export default class ChartUiBuilder extends Component {
 
   @action
   insertChart() {
-    this.args.model.toolbarEvent.addText(this.generateChartMarkup(this.config));
+    this.args.model.toolbarEvent.addText(this.generateChartMarkup());
     this.args.closeModal();
   }
 
-  generateChartMarkup(config) {
+  @debounce(100)
+  focusLastLabel(element) {
+    element.focus();
+  }
+
+  @debounce(100)
+  setDisabled() {
+    this.disabled = !this.rows.some((row) => this.isValidRow(row));
+  }
+
+  isValidRow(row) {
+    return row.label && row.value;
+  }
+
+  generateChartMarkup() {
     const chartOptions = ["type='horizontalBar'"];
-    if (config.title) {
-      chartOptions.push(`title='${config.title}'`);
+    if (this.config.title) {
+      chartOptions.push(`title='${this.config.title}'`);
     }
-    if (config.xAxisTitle) {
-      chartOptions.push(`xAxisTitle='${config.xAxisTitle}'`);
+    if (this.config.xAxisTitle) {
+      chartOptions.push(`xAxisTitle='${this.config.xAxisTitle}'`);
     }
     let markup = `[chart ${chartOptions.join(" ")}]`;
     markup += "\n";
@@ -78,11 +87,6 @@ export default class ChartUiBuilder extends Component {
       label: null,
       value: null,
     });
-  }
-
-  @debounce(100)
-  focusLastLabel(element) {
-    element.focus();
   }
 
   <template>
@@ -123,7 +127,7 @@ export default class ChartUiBuilder extends Component {
                     class="row-label"
                     @value={{row.label}}
                     {{didInsert this.focusLastLabel}}
-                    {{on "input" (fn this.isValidRow row)}}
+                    {{on "input" this.setDisabled}}
                   />
                   <Input
                     placeholder={{i18n
@@ -131,7 +135,7 @@ export default class ChartUiBuilder extends Component {
                     }}
                     class="row-value"
                     @value={{row.value}}
-                    {{on "input" (fn this.isValidRow row)}}
+                    {{on "input" this.setDisabled}}
                   />
                   <DButton @icon="plus" @action={{this.addRow}} />
                   <DButton
