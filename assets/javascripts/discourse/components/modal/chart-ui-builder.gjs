@@ -7,50 +7,41 @@ import { fn } from "@ember/helper";
 import EmberObject, { action } from "@ember/object";
 import DButton from "discourse/components/d-button";
 import { tracked } from "@glimmer/tracking";
-import { TrackedArray } from "@ember-compat/tracked-built-ins";
 import { Input } from "@ember/component";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { debounce } from "discourse-common/utils/decorators";
-import { TrackedObject } from "@ember-compat/tracked-built-ins";
 
 export default class ChartUiBuilder extends Component {
   @tracked config;
   @tracked rows;
+  @tracked disabled = true;
 
   constructor() {
     super(...arguments);
     this.initializeConfig();
   }
 
-  get cannotInsertChart() {
-    const validRows = [];
-    this.rows.forEach((row) => {
-      if (this.isValidRow(row)) {
-        validRows.push(row);
-      }
-    });
-
-    return validRows.length < 1;
+  @action
+  isValidRow(row) {
+    this.disabled = !(row.label && row.value);
   }
 
   @action
   addRow() {
-    this.rows.pushObject(this.initializeRow());
+    this.rows = this.rows.push(this.initializeRow());
   }
 
   @action
-  removeRow(row) {
-    this.rows.removeObject(row);
-
+  removeRow(rowToBeRemoved) {
+    this.rows = this.rows.filter((row) => row !== rowToBeRemoved);
     if (this.rows.length === 0) {
-      this.rows.pushObject(this.initializeRow());
+      this.rows = [this.initializeRow()];
     }
   }
 
   @action
   insertChart() {
     this.args.model.toolbarEvent.addText(this.generateChartMarkup(this.config));
-    this.initializeConfig();
     this.args.closeModal();
   }
 
@@ -79,7 +70,7 @@ export default class ChartUiBuilder extends Component {
       title: null,
       xAxisTitle: null,
     });
-    this.rows = new TrackedArray([this.initializeRow()]);
+    this.rows = [this.initializeRow()];
   }
 
   initializeRow() {
@@ -87,10 +78,6 @@ export default class ChartUiBuilder extends Component {
       label: null,
       value: null,
     });
-  }
-
-  isValidRow(row) {
-    return row.label && row.value;
   }
 
   @debounce(100)
@@ -123,13 +110,7 @@ export default class ChartUiBuilder extends Component {
             <div class="section-title">
               <h3>{{i18n "chart.ui_builder.chart_data"}}</h3>
               <div class="section-actions">
-                {{#unless this.rows}}
-                  <DButton
-                    @type="button"
-                    @icon="plus"
-                    @action={{this.addRow}}
-                  />
-                {{/unless}}
+                <DButton @icon="plus" @action={{this.addRow}} />
               </div>
             </div>
             <div class="section-body">
@@ -142,6 +123,7 @@ export default class ChartUiBuilder extends Component {
                     class="row-label"
                     @value={{row.label}}
                     {{didInsert this.focusLastLabel}}
+                    {{on "input" (fn this.isValidRow row)}}
                   />
                   <Input
                     placeholder={{i18n
@@ -149,14 +131,10 @@ export default class ChartUiBuilder extends Component {
                     }}
                     class="row-value"
                     @value={{row.value}}
+                    {{on "input" (fn this.isValidRow row)}}
                   />
+                  <DButton @icon="plus" @action={{this.addRow}} />
                   <DButton
-                    @type="button"
-                    @icon="plus"
-                    @action={{this.addRow}}
-                  />
-                  <DButton
-                    @type="button"
                     @icon="trash-alt"
                     @action={{fn this.removeRow row}}
                   />
@@ -168,8 +146,7 @@ export default class ChartUiBuilder extends Component {
       </:body>
       <:footer>
         <DButton
-          @type="button"
-          @disabled={{this.cannotInsertChart}}
+          @disabled={{this.disabled}}
           class="btn-primary"
           @label="chart.ui_builder.insert_chart"
           @icon="chart-line"
