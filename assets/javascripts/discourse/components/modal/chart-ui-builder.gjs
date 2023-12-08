@@ -3,7 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { Input } from "@ember/component";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
-import EmberObject, { action } from "@ember/object";
+import { action } from "@ember/object";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import DButton from "discourse/components/d-button";
 import DModal from "discourse/components/d-modal";
@@ -75,18 +75,18 @@ export default class ChartUiBuilder extends Component {
   }
 
   initializeConfig() {
-    this.config = EmberObject.create({
+    this.config = {
       title: null,
       xAxisTitle: null,
-    });
+    };
     this.rows = [this.initializeRow()];
   }
 
   initializeRow() {
-    return EmberObject.create({
+    return {
       label: null,
       value: null,
-    });
+    };
   }
 
   <template>
@@ -94,59 +94,55 @@ export default class ChartUiBuilder extends Component {
       @title={{i18n "chart.ui_builder.title"}}
       class="chart-ui-builder"
       @closeModal={{@closeModal}}
+      @tagName="form"
     >
       <:body>
-        <form>
-          <section class="options-form">
-            <Input
-              placeholder={{i18n "chart.ui_builder.config.title_placeholder"}}
-              @value={{this.config.title}}
-            />
-            <Input
-              placeholder={{i18n
-                "chart.ui_builder.config.x_axis_title_placeholder"
-              }}
-              @value={{this.config.xAxisTitle}}
-            />
-          </section>
+        <section class="options-form">
+          <Input
+            placeholder={{i18n "chart.ui_builder.config.title_placeholder"}}
+            @value={{this.config.title}}
+          />
+          <Input
+            placeholder={{i18n
+              "chart.ui_builder.config.x_axis_title_placeholder"
+            }}
+            @value={{this.config.xAxisTitle}}
+          />
+        </section>
 
-          <section class="rows-form">
-            <div class="section-title">
-              <h3>{{i18n "chart.ui_builder.chart_data"}}</h3>
-              <div class="section-actions">
+        <section class="rows-form">
+          <div class="section-title">
+            <h3>{{i18n "chart.ui_builder.chart_data"}}</h3>
+            <div class="section-actions">
+              <DButton @icon="plus" @action={{this.addRow}} />
+            </div>
+          </div>
+          <div class="section-body">
+            {{#each this.rows as |row|}}
+              <div class="config-row">
+                <Input
+                  placeholder={{i18n
+                    "chart.ui_builder.config.label_placeholder"
+                  }}
+                  class="row-label"
+                  @value={{row.label}}
+                  {{didInsert this.focusLastLabel}}
+                  {{on "input" this.setDisabled}}
+                />
+                <Input
+                  placeholder={{i18n
+                    "chart.ui_builder.config.value_placeholder"
+                  }}
+                  class="row-value"
+                  @value={{row.value}}
+                  {{on "input" this.setDisabled}}
+                />
                 <DButton @icon="plus" @action={{this.addRow}} />
+                <DButton @icon="trash-alt" @action={{fn this.removeRow row}} />
               </div>
-            </div>
-            <div class="section-body">
-              {{#each this.rows as |row|}}
-                <div class="config-row">
-                  <Input
-                    placeholder={{i18n
-                      "chart.ui_builder.config.label_placeholder"
-                    }}
-                    class="row-label"
-                    @value={{row.label}}
-                    {{didInsert this.focusLastLabel}}
-                    {{on "input" this.setDisabled}}
-                  />
-                  <Input
-                    placeholder={{i18n
-                      "chart.ui_builder.config.value_placeholder"
-                    }}
-                    class="row-value"
-                    @value={{row.value}}
-                    {{on "input" this.setDisabled}}
-                  />
-                  <DButton @icon="plus" @action={{this.addRow}} />
-                  <DButton
-                    @icon="trash-alt"
-                    @action={{fn this.removeRow row}}
-                  />
-                </div>
-              {{/each}}
-            </div>
-          </section>
-        </form>
+            {{/each}}
+          </div>
+        </section>
       </:body>
       <:footer>
         <DButton
