@@ -5,32 +5,33 @@ import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
+import { TrackedArray } from "@ember-compat/tracked-built-ins";
 import DButton from "discourse/components/d-button";
 import DModal from "discourse/components/d-modal";
 import i18n from "discourse-common/helpers/i18n";
 import { debounce } from "discourse-common/utils/decorators";
 
 export default class ChartUiBuilder extends Component {
-  @tracked config;
-  @tracked rows;
+  @tracked config = {
+    title: null,
+    xAxisTitle: null,
+  };
+  @tracked rows = new TrackedArray([this.initializeRow()]);
   @tracked disabled = true;
-
-  constructor() {
-    super(...arguments);
-    this.initializeConfig();
-  }
 
   @action
   addRow() {
     this.rows.push(this.initializeRow());
-    this.rows = this.rows;
   }
 
   @action
   removeRow(rowToBeRemoved) {
-    this.rows = this.rows.filter((row) => row !== rowToBeRemoved);
+    this.rows = new TrackedArray(
+      this.rows.filter((row) => row !== rowToBeRemoved)
+    );
+
     if (this.rows.length === 0) {
-      this.rows = [this.initializeRow()];
+      this.addRow();
     }
   }
 
@@ -72,14 +73,6 @@ export default class ChartUiBuilder extends Component {
     });
     markup += "[/chart]";
     return markup;
-  }
-
-  initializeConfig() {
-    this.config = {
-      title: null,
-      xAxisTitle: null,
-    };
-    this.rows = [this.initializeRow()];
   }
 
   initializeRow() {

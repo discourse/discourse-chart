@@ -338,7 +338,7 @@ export default {
     withPluginApi("0.8.31", (api) => {
       api.decorateCookedElement(
         (cooked) => {
-          const siteSettings = api.container.lookup("site-settings:main");
+          const siteSettings = api.container.lookup("service:site-settings");
           if (siteSettings.discourse_chart_enabled) {
             const discourseCharts = cooked.querySelectorAll(".discourse-chart");
             this.renderCharts(discourseCharts);
