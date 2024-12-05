@@ -131,7 +131,7 @@ export default class ChartUiBuilder extends Component {
                   {{on "input" this.setDisabled}}
                 />
                 <DButton @icon="plus" @action={{this.addRow}} />
-                <DButton @icon="trash-alt" @action={{fn this.removeRow row}} />
+                <DButton @icon="trash-can" @action={{fn this.removeRow row}} />
               </div>
             {{/each}}
           </div>
