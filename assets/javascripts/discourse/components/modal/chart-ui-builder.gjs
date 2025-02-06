@@ -8,8 +8,8 @@ import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import { TrackedArray } from "@ember-compat/tracked-built-ins";
 import DButton from "discourse/components/d-button";
 import DModal from "discourse/components/d-modal";
-import i18n from "discourse-common/helpers/i18n";
-import { debounce } from "discourse-common/utils/decorators";
+import { debounce } from "discourse/lib/decorators";
+import { i18n } from "discourse-i18n";
 
 export default class ChartUiBuilder extends Component {
   @tracked config = {

@@ -2,7 +2,7 @@ import { number } from "discourse/lib/formatter";
 import loadScript from "discourse/lib/load-script";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import Site from "discourse/models/site";
-import I18n from "discourse-i18n";
+import { i18n } from "discourse-i18n";
 
 const DEFAULT_CHART_OPTIONS = {
   responsive: true,
@@ -328,7 +328,7 @@ export default {
       console.log(e);
       const errorNode = document.createElement("div");
       errorNode.classList.add("discourse-chart-error");
-      errorNode.textContent = I18n.t("chart.rendering_error");
+      errorNode.textContent = i18n("chart.rendering_error");
       container.innerHTML = "";
       container.appendChild(errorNode);
     }
