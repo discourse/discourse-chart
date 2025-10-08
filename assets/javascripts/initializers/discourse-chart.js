@@ -335,7 +335,7 @@ export default {
   },
 
   initialize() {
-    withPluginApi("0.8.31", (api) => {
+    withPluginApi((api) => {
       api.decorateCookedElement(
         (cooked) => {
           const siteSettings = api.container.lookup("service:site-settings");
