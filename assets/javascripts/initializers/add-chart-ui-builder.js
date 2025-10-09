@@ -21,6 +21,6 @@ export default {
   name: "add-chart-ui-builder",
 
   initialize() {
-    withPluginApi("1.13.0", initializeChartUIBuilder);
+    withPluginApi(initializeChartUIBuilder);
   },
 };
