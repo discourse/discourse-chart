@@ -1,5 +1,5 @@
 import { number } from "discourse/lib/formatter";
-import loadScript from "discourse/lib/load-script";
+import loadChartJS from "discourse/lib/load-chart-js";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import Site from "discourse/models/site";
 import { i18n } from "discourse-i18n";
@@ -284,17 +284,16 @@ function circularChart(series, attributes) {
 export default {
   name: "discourse-chart",
 
-  renderCharts(charts) {
+  async renderCharts(charts) {
     if (!charts.length) {
       return;
     }
 
-    loadScript("/javascripts/Chart.min.js").then(() => {
-      charts.forEach((chartContainer) => this.renderChart(chartContainer));
-    });
+    const Chart = await loadChartJS();
+    charts.forEach((chartContainer) => this.renderChart(chartContainer, Chart));
   },
 
-  renderChart(container) {
+  renderChart(container, Chart) {
     const attributes = extractAttributes(container);
     const data = cleanMarkup(container.textContent);
     container.innerHTML = "";
@@ -319,7 +318,7 @@ export default {
 
       const canvas = document.createElement("canvas");
       // eslint-disable-next-line
-      new window.Chart(canvas, chart);
+      new Chart(canvas, chart);
       container.innerHTML = "";
       container.appendChild(canvas);
       container.classList.remove("is-loading");
