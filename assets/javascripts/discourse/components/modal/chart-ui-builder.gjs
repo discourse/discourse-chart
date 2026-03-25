@@ -4,8 +4,8 @@ import { Input } from "@ember/component";
 import { fn } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
+import { trackedArray } from "@ember/reactive/collections";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
-import { TrackedArray } from "@ember-compat/tracked-built-ins";
 import DButton from "discourse/components/d-button";
 import DModal from "discourse/components/d-modal";
 import { debounce } from "discourse/lib/decorators";
@@ -16,7 +16,7 @@ export default class ChartUiBuilder extends Component {
     title: null,
     xAxisTitle: null,
   };
-  @tracked rows = new TrackedArray([this.initializeRow()]);
+  @tracked rows = trackedArray([this.initializeRow()]);
   @tracked disabled = true;
 
   @action
@@ -26,9 +26,7 @@ export default class ChartUiBuilder extends Component {
 
   @action
   removeRow(rowToBeRemoved) {
-    this.rows = new TrackedArray(
-      this.rows.filter((row) => row !== rowToBeRemoved)
-    );
+    this.rows = trackedArray(this.rows.filter((row) => row !== rowToBeRemoved));
 
     if (this.rows.length === 0) {
       this.addRow();
