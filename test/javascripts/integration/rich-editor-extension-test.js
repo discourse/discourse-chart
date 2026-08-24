@@ -58,5 +58,47 @@ module(
         `the chart data is untouched, got: ${editorClass.value}`
       );
     });
+
+    test("round-trips attribute values that have to be escaped in HTML", async function (assert) {
+      const chart = '[chart type="bar" title="R&D <x>"]\n1,2,3\n[/chart]';
+
+      await testMarkdown(
+        assert,
+        chart,
+        (a) => a.dom(".composer-preview-node").exists(),
+        chart
+      );
+    });
+
+    test("keeps the rows of a pasted chart", async function (assert) {
+      const [editorClass] = await setupRichEditor(assert, "");
+      const { view } = editorClass;
+
+      view.pasteHTML(
+        '<div class="discourse-chart is-building is-loading" data-type="bar" data-title="T">| a | b\n| 1 | 2\n| 3 | 4</div>'
+      );
+
+      assert.strictEqual(
+        editorClass.value.trim(),
+        '[chart type="bar" title="T"]\n| a | b\n| 1 | 2\n| 3 | 4\n[/chart]',
+        "every row survives the round trip through cooked HTML"
+      );
+    });
+
+    test("puts the caret in the data of a chart it just inserted", async function (assert) {
+      const [editorClass] = await setupRichEditor(assert, "before");
+      const { view } = editorClass;
+
+      view.dispatch(view.state.tr.insertText("[chart"));
+      const pos = view.state.selection.from;
+      view.someProp("handleTextInput", (f) => f(view, pos, pos, "]"));
+
+      const { selection } = view.state;
+      assert.strictEqual(
+        selection.$head.parent.type.name,
+        "preview_source",
+        "typing carries on inside the new chart"
+      );
+    });
   }
 );

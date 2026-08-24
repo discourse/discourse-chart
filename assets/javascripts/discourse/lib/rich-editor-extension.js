@@ -1,4 +1,8 @@
 import PreviewNodeView from "discourse/components/composer/preview-node-view";
+import {
+  previewSourceNode,
+  selectPreviewSource,
+} from "discourse/lib/composer/preview-block";
 import ChartPreview from "../components/chart-preview";
 
 const dashToCamelCase = (str) =>
@@ -34,6 +38,13 @@ const extension = {
         {
           tag: "div.discourse-chart",
           getAttrs: (dom) => ({ params: { ...dom.dataset } }),
+          // a cooked chart holds one row per line as plain text, which the
+          // parser would otherwise collapse into a single row
+          getContent: (dom, schema) =>
+            schema.nodes.discourse_chart.create(
+              null,
+              previewSourceNode(schema, dom.textContent)
+            ).content,
         },
       ],
       toDOM: (node) => [
@@ -69,23 +80,32 @@ const extension = {
     },
   },
 
-  inputRules: ({ schema }) => ({
+  inputRules: ({ schema, pmState: { TextSelection } }) => ({
     match: /\[chart]$/,
     handler: (state, match, start, end) => {
-      const chart = schema.nodes.discourse_chart.createAndFill(
+      const chart = schema.nodes.discourse_chart.create(
         { params: {} },
-        schema.nodes.preview_source.create()
+        previewSourceNode(schema, "")
       );
       const isAtStart = state.doc.resolve(start).parentOffset === 0;
+      const from = isAtStart ? start - 1 : start;
 
-      return state.tr.replaceWith(isAtStart ? start - 1 : start, end, chart);
+      return selectPreviewSource(
+        state.tr.replaceWith(from, end, chart),
+        TextSelection,
+        from
+      );
     },
   }),
 
   serializeNode: {
     discourse_chart(state, node) {
       const params = Object.entries(node.attrs.params)
-        .map(([name, value]) => ` ${name}="${value}"`)
+        // the bbcode tag has no escape for either character, so a value
+        // carrying one would end the attribute or the tag early
+        .map(
+          ([name, value]) => ` ${name}="${`${value}`.replace(/["\]]/g, "")}"`
+        )
         .join("");
 
       state.write(`[chart${params}]\n`);

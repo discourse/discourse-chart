@@ -6,39 +6,41 @@ const SUPPORTED_CHART_TYPES = [
   "horizontalBar",
 ];
 
-function processAttributes(attrs, escapeHtml) {
+// values are kept as the author wrote them; escaping belongs to the renderer,
+// as anything reading the token back (the rich editor) needs the original
+function processAttributes(attrs) {
   const attributes = {};
 
   const inputType = attrs.type;
 
   if (inputType && SUPPORTED_CHART_TYPES.includes(inputType)) {
-    attributes["type"] = escapeHtml(inputType);
+    attributes["type"] = inputType;
   } else {
     attributes["type"] = SUPPORTED_CHART_TYPES[0];
   }
 
   if (attrs["borderColors"]) {
-    attributes["border-colors"] = escapeHtml(attrs["borderColors"]);
+    attributes["border-colors"] = attrs["borderColors"];
   }
 
   if (attrs["backgroundColors"]) {
-    attributes["background-colors"] = escapeHtml(attrs["backgroundColors"]);
+    attributes["background-colors"] = attrs["backgroundColors"];
   }
 
   if (attrs["xAxisTitle"]) {
-    attributes["x-axis-title"] = escapeHtml(attrs["xAxisTitle"]);
+    attributes["x-axis-title"] = attrs["xAxisTitle"];
   }
 
   if (attrs["yAxisTitle"]) {
-    attributes["y-axis-title"] = escapeHtml(attrs["yAxisTitle"]);
+    attributes["y-axis-title"] = attrs["yAxisTitle"];
   }
 
   if (attrs["title"]) {
-    attributes["title"] = escapeHtml(attrs["title"]);
+    attributes["title"] = attrs["title"];
   }
 
   if (attrs["labels"]) {
-    attributes["labels"] = escapeHtml(attrs["labels"]);
+    attributes["labels"] = attrs["labels"];
   }
 
   return attributes;
@@ -66,6 +68,12 @@ export function setup(helper) {
   ]);
 
   helper.registerPlugin((md) => {
+    // the rule's name does not match the feature's, so it is never disabled
+    // along with it
+    if (!md.options.discourse.features.discourse_chart) {
+      return;
+    }
+
     md.block.bbcode.ruler.push("discourse-chart", {
       tag: "chart",
 
@@ -74,10 +82,7 @@ export function setup(helper) {
         token.block = true;
         token.content = content.split("\n").filter(Boolean).join("\n");
 
-        const attributes = processAttributes(
-          tagInfo.attrs,
-          state.md.utils.escapeHtml
-        );
+        const attributes = processAttributes(tagInfo.attrs);
         token.attrs = Object.entries(attributes).map(([name, value]) => [
           `data-${name}`,
           value,
@@ -92,7 +97,7 @@ export function setup(helper) {
     md.renderer.rules.discourse_chart = (tokens, idx) => {
       const token = tokens[idx];
       const attributes = token.attrs
-        .map(([name, value]) => `${name}="${value}"`)
+        .map(([name, value]) => `${name}="${md.utils.escapeHtml(value)}"`)
         .join(" ");
 
       return `<div class="discourse-chart is-building is-loading" ${attributes}>${md.utils.escapeHtml(

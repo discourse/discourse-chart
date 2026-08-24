@@ -2,12 +2,38 @@ import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import didInsert from "@ember/render-modifiers/modifiers/did-insert";
 import didUpdate from "@ember/render-modifiers/modifiers/did-update";
+import loadChartJS from "discourse/lib/load-chart-js";
 import chart from "../../initializers/discourse-chart";
 
 export default class ChartPreview extends Component {
+  #element;
+  #Chart;
+
+  // the source can change again while the library is still loading, and the
+  // renders would then land out of order; only the newest one may draw
+  #renderId = 0;
+
+  willDestroy() {
+    super.willDestroy(...arguments);
+
+    this.#renderId++;
+    this.#destroyChart();
+  }
+
   @action
-  renderChart(element) {
-    // the renderer consumes the container, so it is rebuilt on every change
+  async renderChart(element) {
+    this.#element = element;
+    const renderId = ++this.#renderId;
+
+    this.#Chart ??= await loadChartJS();
+
+    if (renderId !== this.#renderId) {
+      return;
+    }
+
+    // the renderer consumes the container, so it is rebuilt on every change,
+    // taking the chart drawn into the previous canvas with it
+    this.#destroyChart();
     element.className = "discourse-chart is-building is-loading";
     element.textContent = this.args.source;
 
@@ -15,7 +41,15 @@ export default class ChartPreview extends Component {
       element.dataset[name] = value;
     }
 
-    chart.renderCharts([element]);
+    chart.renderChart(element, this.#Chart);
+  }
+
+  #destroyChart() {
+    const canvas = this.#element?.querySelector("canvas");
+
+    if (canvas) {
+      this.#Chart?.getChart(canvas)?.destroy();
+    }
   }
 
   <template>
