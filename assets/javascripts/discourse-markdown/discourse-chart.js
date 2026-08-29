@@ -52,28 +52,15 @@ export function setup(helper) {
   }
 
   helper.registerOptions((opts, siteSettings) => {
-    opts.features.discourse_chart = siteSettings.discourse_chart_enabled;
+    opts.features["discourse-chart"] = !!siteSettings.discourse_chart_enabled;
   });
 
   helper.allowList([
     "div.discourse-chart",
     "div[class=discourse-chart is-building is-loading]",
-    "div[data-type]",
-    "div[data-labels]",
-    "div[data-title]",
-    "div[data-x-axis-title]",
-    "div[data-y-axis-title]",
-    "div[data-border-colors]",
-    "div[data-background-colors]",
   ]);
 
   helper.registerPlugin((md) => {
-    // the rule's name does not match the feature's, so it is never disabled
-    // along with it
-    if (!md.options.discourse.features.discourse_chart) {
-      return;
-    }
-
     md.block.bbcode.ruler.push("discourse-chart", {
       tag: "chart",
 

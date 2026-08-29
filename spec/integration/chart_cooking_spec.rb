@@ -55,4 +55,11 @@ RSpec.describe "Chart cooking" do
 
     expect(post.cooked).not_to include("discourse-chart")
   end
+
+  it "deactivates its allowlist entries when the plugin is disabled" do
+    SiteSetting.discourse_chart_enabled = false
+    post = Fabricate(:post, raw: '<div class="discourse-chart" data-type="bar">| a</div>')
+
+    expect(post.cooked).not_to include("discourse-chart")
+  end
 end
