@@ -70,6 +70,28 @@ module(
       );
     });
 
+    test("round-trips an attribute value containing a closing bracket", async function (assert) {
+      const chart = '[chart type="bar" title="a]b"]\n1,2,3\n[/chart]';
+
+      await testMarkdown(
+        assert,
+        chart,
+        (a) => a.dom(".composer-preview-node").exists(),
+        chart
+      );
+    });
+
+    test("round-trips an attribute value containing double quotes", async function (assert) {
+      const chart = '[chart type="bar" title=\'say "hi"\']\n1,2,3\n[/chart]';
+
+      await testMarkdown(
+        assert,
+        chart,
+        (a) => a.dom(".composer-preview-node").exists(),
+        chart
+      );
+    });
+
     test("keeps the rows of a pasted chart", async function (assert) {
       const [editorClass] = await setupRichEditor(assert, "");
       const { view } = editorClass;

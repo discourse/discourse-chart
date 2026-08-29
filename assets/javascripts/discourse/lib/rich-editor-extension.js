@@ -8,6 +8,22 @@ import ChartPreview from "../components/chart-preview";
 const dashToCamelCase = (str) =>
   str.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
 
+// bbcode has no escape sequence inside a quoted value, but it accepts either
+// quote style, so a value containing one can be wrapped in the other
+function quoteAttrValue(value) {
+  value = `${value}`;
+
+  if (!value.includes(`"`)) {
+    return `"${value}"`;
+  }
+
+  if (!value.includes(`'`)) {
+    return `'${value}'`;
+  }
+
+  return `"${value.replaceAll(`"`, "")}"`;
+}
+
 function toDataAttrs(params) {
   const attrs = {};
 
@@ -101,11 +117,7 @@ const extension = {
   serializeNode: {
     discourse_chart(state, node) {
       const params = Object.entries(node.attrs.params)
-        // the bbcode tag has no escape for either character, so a value
-        // carrying one would end the attribute or the tag early
-        .map(
-          ([name, value]) => ` ${name}="${`${value}`.replace(/["\]]/g, "")}"`
-        )
+        .map(([name, value]) => ` ${name}=${quoteAttrValue(value)}`)
         .join("");
 
       state.write(`[chart${params}]\n`);
