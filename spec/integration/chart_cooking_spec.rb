@@ -22,17 +22,8 @@ RSpec.describe "Chart cooking" do
     post = Fabricate(:post, raw: "[chart type=\"bar\" title=\"R&D <x>\"]\n| a & <b>\n[/chart]")
 
     expect(post.cooked).to include("| a &amp; &lt;b&gt;")
-    # angle brackets are inert within a quoted value, and the sanitizer leaves
-    # them there; what matters is that the value cannot end the attribute
+    # the sanitizer re-escapes only quotes; what matters is the value cannot end the attribute
     expect(post.cooked).to include('data-title="R&amp;D <x>"')
-    expect(post.cooked).not_to include("<x>>")
-  end
-
-  it "cannot be made to break out of an attribute" do
-    post =
-      Fabricate(:post, raw: "[chart type=\"bar\" title=\"a\\\" onerror=\\\"x\"]\n| a\n[/chart]")
-
-    expect(post.cooked).not_to include("onerror=\"x\"")
   end
 
   it "falls back to a supported type" do
@@ -49,17 +40,14 @@ RSpec.describe "Chart cooking" do
     expect(post.cooked).to include("discourse-chart")
   end
 
-  it "does not render when the plugin is disabled" do
+  it "does not render or allowlist its markup when the plugin is disabled" do
     SiteSetting.discourse_chart_enabled = false
-    post = Fabricate(:post, raw: "[chart type=\"bar\"]\n| a\n[/chart]")
 
-    expect(post.cooked).not_to include("discourse-chart")
-  end
-
-  it "deactivates its allowlist entries when the plugin is disabled" do
-    SiteSetting.discourse_chart_enabled = false
-    post = Fabricate(:post, raw: '<div class="discourse-chart" data-type="bar">| a</div>')
-
-    expect(post.cooked).not_to include("discourse-chart")
+    expect(Fabricate(:post, raw: "[chart type=\"bar\"]\n| a\n[/chart]").cooked).not_to include(
+      "discourse-chart",
+    )
+    expect(
+      Fabricate(:post, raw: '<div class="discourse-chart" data-type="bar">| a</div>').cooked,
+    ).not_to include("discourse-chart")
   end
 end

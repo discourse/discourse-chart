@@ -12,41 +12,28 @@ export default class ChartPreview extends Component {
   #element;
   #Chart;
 
-  // the source can change again while the library is still loading, and the
-  // renders would then land out of order; only the newest one may draw
-  #renderId = 0;
-
   willDestroy() {
     super.willDestroy(...arguments);
-
-    this.#renderId++;
     this.#destroyChart();
   }
 
   @action
   async renderChart(element) {
     this.#element = element;
-    const renderId = ++this.#renderId;
-
     this.#Chart ??= await loadChartJS();
 
-    if (renderId !== this.#renderId) {
+    if (this.isDestroying) {
       return;
     }
 
-    // the renderer consumes the container, so it is rebuilt on every change,
-    // taking the chart drawn into the previous canvas with it
+    // the renderer empties the container, so the previous canvas goes with it
     this.#destroyChart();
     element.className = "discourse-chart is-building is-loading";
     element.textContent = this.args.source;
-
-    for (const [name, value] of Object.entries(this.args.node.attrs.params)) {
-      element.dataset[name] = value;
-    }
-
-    // a block inserted in the editor carries no attributes yet, and the
-    // renderer has no type to draw
-    element.dataset.type ||= DEFAULT_TYPE;
+    Object.assign(element.dataset, {
+      type: DEFAULT_TYPE,
+      ...this.args.node.attrs.params,
+    });
 
     chart.renderChart(element, this.#Chart);
   }
