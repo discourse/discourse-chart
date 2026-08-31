@@ -5,6 +5,9 @@ import didUpdate from "@ember/render-modifiers/modifiers/did-update";
 import loadChartJS from "discourse/lib/load-chart-js";
 import chart from "../../initializers/discourse-chart";
 
+// matches the fallback the markdown rule applies when no type is given
+const DEFAULT_TYPE = "line";
+
 export default class ChartPreview extends Component {
   #element;
   #Chart;
@@ -40,6 +43,10 @@ export default class ChartPreview extends Component {
     for (const [name, value] of Object.entries(this.args.node.attrs.params)) {
       element.dataset[name] = value;
     }
+
+    // a block inserted in the editor carries no attributes yet, and the
+    // renderer has no type to draw
+    element.dataset.type ||= DEFAULT_TYPE;
 
     chart.renderChart(element, this.#Chart);
   }

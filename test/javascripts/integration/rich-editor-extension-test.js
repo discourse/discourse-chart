@@ -1,3 +1,4 @@
+import { settled } from "@ember/test-helpers";
 import { module, test } from "qunit";
 import {
   registerRichEditorExtension,
@@ -105,6 +106,25 @@ module(
         '[chart type="bar" title="T"]\n| a | b\n| 1 | 2\n| 3 | 4\n[/chart]',
         "every row survives the round trip through cooked HTML"
       );
+    });
+
+    test("gives a chart it just inserted a type to draw", async function (assert) {
+      const [editorClass] = await setupRichEditor(assert, "");
+      const { view } = editorClass;
+
+      view.dispatch(view.state.tr.insertText("[chart"));
+      const pos = view.state.selection.from;
+      view.someProp("handleTextInput", (f) => f(view, pos, pos, "]"));
+      await settled();
+
+      // the markdown rule defaults the type; a block inserted here carries no
+      // attributes at all, and the renderer has nothing to draw without one
+      assert
+        .dom(".composer-preview-node__preview .discourse-chart")
+        .hasAttribute("data-type", "line");
+      assert
+        .dom(".composer-preview-node__preview .discourse-chart-error")
+        .doesNotExist();
     });
 
     test("puts the caret in the data of a chart it just inserted", async function (assert) {

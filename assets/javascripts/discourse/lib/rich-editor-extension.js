@@ -41,12 +41,12 @@ const extension = {
     discourse_chart: {
       attrs: { params: { default: {} } },
       group: "block",
-      // isolating keeps the text around it from merging into the data
       content: "preview_source",
       // the node view owns the source, so the editor moves over the block as a
       // unit rather than stepping into text it is not showing
       atom: true,
       defining: true,
+      // keeps the text around it from merging into the data
       isolating: true,
       selectable: true,
       createGapCursor: true,
