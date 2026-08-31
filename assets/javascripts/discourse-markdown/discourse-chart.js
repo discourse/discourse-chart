@@ -1,3 +1,5 @@
+import { camelCaseToDash } from "discourse/lib/case-converter";
+
 const SUPPORTED_CHART_TYPES = [
   "line",
   "bar",
@@ -6,39 +8,27 @@ const SUPPORTED_CHART_TYPES = [
   "horizontalBar",
 ];
 
-function processAttributes(attrs, escapeHtml) {
-  const attributes = {};
+const ATTRIBUTES = [
+  "borderColors",
+  "backgroundColors",
+  "xAxisTitle",
+  "yAxisTitle",
+  "title",
+  "labels",
+];
 
-  const inputType = attrs.type;
+// values stay as authored; the renderer escapes, so the token keeps the original
+function processAttributes({ type, ...attrs }) {
+  const attributes = {
+    type: SUPPORTED_CHART_TYPES.includes(type)
+      ? type
+      : SUPPORTED_CHART_TYPES[0],
+  };
 
-  if (inputType && SUPPORTED_CHART_TYPES.includes(inputType)) {
-    attributes["type"] = escapeHtml(inputType);
-  } else {
-    attributes["type"] = SUPPORTED_CHART_TYPES[0];
-  }
-
-  if (attrs["borderColors"]) {
-    attributes["border-colors"] = escapeHtml(attrs["borderColors"]);
-  }
-
-  if (attrs["backgroundColors"]) {
-    attributes["background-colors"] = escapeHtml(attrs["backgroundColors"]);
-  }
-
-  if (attrs["xAxisTitle"]) {
-    attributes["x-axis-title"] = escapeHtml(attrs["xAxisTitle"]);
-  }
-
-  if (attrs["yAxisTitle"]) {
-    attributes["y-axis-title"] = escapeHtml(attrs["yAxisTitle"]);
-  }
-
-  if (attrs["title"]) {
-    attributes["title"] = escapeHtml(attrs["title"]);
-  }
-
-  if (attrs["labels"]) {
-    attributes["labels"] = escapeHtml(attrs["labels"]);
+  for (const name of ATTRIBUTES) {
+    if (attrs[name]) {
+      attributes[name] = attrs[name];
+    }
   }
 
   return attributes;
@@ -50,45 +40,40 @@ export function setup(helper) {
   }
 
   helper.registerOptions((opts, siteSettings) => {
-    opts.features.discourse_chart = siteSettings.discourse_chart_enabled;
+    opts.features["discourse-chart"] = siteSettings.discourse_chart_enabled;
   });
 
   helper.allowList([
     "div.discourse-chart",
-    "div.discourse-chart.is-loading",
-    "div.discourse-chart.is-building",
+    "div[class=discourse-chart is-building is-loading]",
   ]);
 
   helper.registerPlugin((md) => {
-    md.inline.bbcode.ruler.push("discourse-chart", {
+    md.block.bbcode.ruler.push("discourse-chart", {
       tag: "chart",
 
       replace(state, tagInfo, content) {
-        const token = state.push("html_raw", "", 0);
+        const token = state.push("discourse_chart", "div", 0);
+        token.content = content.split("\n").filter(Boolean).join("\n");
 
-        content = content
-          .split("\n")
-          .filter(Boolean)
-          .map((x) => state.md.utils.escapeHtml(x))
-          .join("\n");
-
-        const attributes = processAttributes(
-          tagInfo.attrs,
-          state.md.utils.escapeHtml
-        );
-
-        const formattedAttributes = [];
-        Object.keys(attributes).forEach((attribute) => {
-          const value = attributes[attribute];
-          formattedAttributes.push(`data-${attribute}="${value}"`);
-        });
-
-        token.content = `<div class="discourse-chart is-building is-loading" ${formattedAttributes.join(
-          " "
-        )}>${content}</div>\n`;
+        token.attrs = Object.entries(processAttributes(tagInfo.attrs));
 
         return true;
       },
     });
+
+    md.renderer.rules.discourse_chart = (tokens, idx) => {
+      const token = tokens[idx];
+      const attributes = token.attrs
+        .map(
+          ([name, value]) =>
+            `data-${camelCaseToDash(name)}="${md.utils.escapeHtml(value)}"`
+        )
+        .join(" ");
+
+      return `<div class="discourse-chart is-building is-loading" ${attributes}>${md.utils.escapeHtml(
+        token.content
+      )}</div>\n`;
+    };
   });
 }
