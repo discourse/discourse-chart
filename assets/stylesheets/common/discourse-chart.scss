@@ -1,7 +1,7 @@
 div.discourse-chart {
   display: flex;
   align-items: center;
-  height: 400px;
+  height: var(--discourse-chart-height, 400px);
   overflow: hidden;
 
   &.is-building {
@@ -20,6 +20,13 @@ div.discourse-chart {
     text-align: center;
     width: 100%;
   }
+}
+
+// The block frames the chart the way the cooked stylesheet does, so both faces
+// fit that frame and scroll whatever does not fit inside it.
+.composer-discourse_chart-node {
+  --composer-preview-node-source-max-height: 100%;
+  height: var(--discourse-chart-height, 400px);
 }
 
 a.discourse-chart-placeholder {
